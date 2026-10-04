@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Dumbscrolling</string>
+    <string name="accessibility_service_description">This service monitors active apps to block social media usage after a set time limit.</string>
+    <string name="overlay_title">Time\'s Up!</string>
+    <string name="overlay_message">You\'ve been scrolling for too long. Time to focus on something else!</string>
+    <string name="overlay_btn">I Need 30 More Seconds</string>
+    <string name="focus_overlay_title">Focus Mode Active</string>
+    <string name="focus_overlay_message">Get back to work!</string>
+</resources>
