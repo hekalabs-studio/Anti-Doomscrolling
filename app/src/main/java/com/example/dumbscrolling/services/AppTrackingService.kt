@@ -53,6 +53,7 @@ class AppTrackingService : AccessibilityService() {
     
     private lateinit var prefs: SharedPreferences
     private lateinit var settingsPrefs: SharedPreferences
+    private val sessionClosedFlags = mutableSetOf<String>()
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -75,20 +76,15 @@ class AppTrackingService : AccessibilityService() {
     }
     
     private fun loadSettings() {
-        // Load target apps
-        val defaultApps = listOf(
+        // Load target apps from SharedPreferences Set
+        val monitored = settingsPrefs.getStringSet("monitored_apps", null) ?: setOf(
             "com.instagram.android",
             "com.zhiliaoapp.musically",
+            "com.ss.android.ugc.trill",
             "com.google.android.youtube",
             "com.facebook.katana",
             "com.twitter.android"
         )
-        val monitored = mutableSetOf<String>()
-        for (app in defaultApps) {
-            if (settingsPrefs.getBoolean("monitored_$app", true)) {
-                monitored.add(app)
-            }
-        }
         targetApps = monitored
         
         // Load time limit
@@ -108,6 +104,7 @@ class AppTrackingService : AccessibilityService() {
             if (packageName != activePackageName) {
                 Log.d("AppTrackingService", "Active app changed to: $packageName")
                 activePackageName = packageName
+                sessionClosedFlags.remove(packageName) // Reset flag on app open
                 handleAppChange(packageName)
             }
         }
@@ -136,10 +133,10 @@ class AppTrackingService : AccessibilityService() {
                     val usagePrefs = getSharedPreferences("UsageStatsPrefs", MODE_PRIVATE)
                     usagePrefs.edit().putLong("usage_$packageName", currentUsage).apply()
                     
-                    if (currentUsage >= timeLimitMs) {
+                    if (!sessionClosedFlags.contains(packageName) && currentUsage >= timeLimitMs) {
                         showOverlay(packageName)
                         trackingJob?.cancel()
-                    } else if (!warned80Percent && currentUsage >= timeLimitMs * 0.8) {
+                    } else if (!warned80Percent && !sessionClosedFlags.contains(packageName) && currentUsage >= timeLimitMs * 0.8) {
                         warned80Percent = true
                         val remainingMinutes = ((timeLimitMs - currentUsage) / 60000).coerceAtLeast(1)
                         val appName = getAppName(packageName)
@@ -270,37 +267,60 @@ class AppTrackingService : AccessibilityService() {
         overlayView = inflater.inflate(R.layout.overlay_blocker, null)
         
         val appName = getAppName(packageName)
-        val usageMinutes = (usageStats.getOrDefault(packageName, 0L) / 60000).coerceAtLeast(1)
+        val usageMs = usageStats.getOrDefault(packageName, 0L)
+        val usageMinutes = usageMs / 60000
+        val usageSeconds = (usageMs % 60000) / 1000
         val limitMinutes = timeLimitMs / 60000
         
+        val appIconView = overlayView?.findViewById<android.widget.ImageView>(R.id.overlayAppIcon)
         val titleText = overlayView?.findViewById<TextView>(R.id.overlayTitle)
         val messageText = overlayView?.findViewById<TextView>(R.id.overlayMessage)
+        val limitText = overlayView?.findViewById<TextView>(R.id.overlaySessionLimit)
+        val totalText = overlayView?.findViewById<TextView>(R.id.overlayTotalToday)
+        val continueText = overlayView?.findViewById<TextView>(R.id.overlayContinueCount)
         val btnClose = overlayView?.findViewById<Button>(R.id.btnCloseOverlay)
+        val btnSecondary = overlayView?.findViewById<Button>(R.id.btnSecondary)
         
-        titleText?.text = "Time's Up!"
-        messageText?.text = "Kamu sudah $usageMinutes menit di $appName (batas $limitMinutes menit)"
-        
-        // We will modify the button text later or use a custom layout.
-        // For now, assume btnClose is the primary button, and we need to add a secondary button.
-        btnClose?.text = "Ke Beranda"
-        btnClose?.setOnClickListener {
-            removeOverlay()
-            performGlobalAction(GLOBAL_ACTION_HOME)
+        try {
+            val icon = packageManager.getApplicationIcon(packageName)
+            appIconView?.setImageDrawable(icon)
+            appIconView?.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            // ignore
         }
         
-        // Add a secondary button programmatically if it doesn't exist in XML yet
-        val container = btnClose?.parent as? android.widget.LinearLayout
-        if (container != null) {
-            val secondaryBtn = Button(this).apply {
-                text = "Beri saya 30 detik"
-                setTextColor(Color.WHITE)
-                background = android.graphics.drawable.ColorDrawable(Color.TRANSPARENT)
-                setOnClickListener {
-                    removeOverlay()
-                    startGracePeriod(packageName)
-                }
+        titleText?.text = getString(R.string.overlay_title)
+        messageText?.text = getString(R.string.overlay_time_spent, usageMinutes, usageSeconds, appName)
+        
+        limitText?.text = getString(R.string.overlay_session_limit, limitMinutes)
+        limitText?.visibility = View.VISIBLE
+        
+        totalText?.text = getString(R.string.overlay_total_today, usageMinutes)
+        totalText?.visibility = View.VISIBLE
+        
+        val continueCount = prefs.getInt("continue_count_$packageName", 0)
+        if (continueCount > 0) {
+            continueText?.text = getString(R.string.overlay_continue_count, continueCount)
+            continueText?.visibility = View.VISIBLE
+        }
+        
+        btnClose?.text = getString(R.string.overlay_close_app_btn, appName)
+        btnClose?.setOnClickListener {
+            removeOverlay()
+            sessionClosedFlags.add(packageName)
+            performGlobalAction(GLOBAL_ACTION_HOME)
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(1000)
+                val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
+                am.killBackgroundProcesses(packageName)
             }
-            container.addView(secondaryBtn)
+        }
+        
+        btnSecondary?.visibility = View.VISIBLE
+        btnSecondary?.setOnClickListener {
+            prefs.edit().putInt("continue_count_$packageName", continueCount + 1).apply()
+            removeOverlay()
+            startGracePeriod(packageName)
         }
 
         overlayView?.setOnTouchListener { _, _ -> true }

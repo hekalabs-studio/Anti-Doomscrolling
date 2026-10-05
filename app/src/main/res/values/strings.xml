@@ -1,9 +1,20 @@
 <resources>
     <string name="app_name">Dumbscrolling</string>
-    <string name="accessibility_service_description">This service monitors active apps to block social media usage after a set time limit.</string>
-    <string name="overlay_title">Time\'s Up!</string>
-    <string name="overlay_message">You\'ve been scrolling for too long. Time to focus on something else!</string>
-    <string name="overlay_btn">I Need 30 More Seconds</string>
-    <string name="focus_overlay_title">Focus Mode Active</string>
-    <string name="focus_overlay_message">Get back to work!</string>
+    <string name="accessibility_service_description">Layanan ini memantau aplikasi aktif untuk memblokir penggunaan media sosial setelah batas waktu yang ditentukan.</string>
+    <string name="overlay_title">Waktu Habis!</string>
+    <string name="overlay_message">Kamu sudah terlalu lama scrolling. Waktunya fokus ke hal lain!</string>
+    <string name="overlay_btn">Beri saya 30 detik</string>
+    <string name="focus_overlay_title">Mode Fokus Aktif</string>
+    <string name="focus_overlay_message">Ayo kembali bekerja!</string>
+
+    <string name="empty_monitored_apps_desc">Belum ada aplikasi dipantau. Tambahkan aplikasi untuk mulai.</string>
+    <string name="add_app_btn">Tambahkan aplikasi</string>
+    <string name="overlay_time_spent">Kamu sudah %1$d menit %2$d detik di %3$s</string>
+    <string name="overlay_session_limit">Batas sesi: %1$d menit</string>
+    <string name="overlay_total_today">Total hari ini: %1$d menit</string>
+    <string name="overlay_continue_count">Kamu sudah memilih lanjut %1$d kali hari ini</string>
+    <string name="overlay_close_app_btn">Tutup %1$s</string>
+    <string name="app_picker_title">Pilih Aplikasi</string>
+    <string name="search_app_hint">Cari aplikasi&#8230;</string>
+    <string name="reset_data_btn">Reset Data</string>
 </resources>

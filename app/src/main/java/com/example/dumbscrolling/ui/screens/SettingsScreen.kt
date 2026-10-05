@@ -5,14 +5,23 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dumbscrolling.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
@@ -23,7 +32,7 @@ fun SettingsScreen(
     if (uiState.showResetDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.hideResetDialog() },
-            title = { Text("Reset Data") },
+            title = { Text(stringResource(R.string.reset_data_btn)) },
             text = { Text("Are you sure you want to reset all usage statistics and focus sessions? This action cannot be undone.") },
             confirmButton = {
                 TextButton(onClick = { viewModel.resetData() }) {
@@ -35,6 +44,14 @@ fun SettingsScreen(
                     Text("Cancel")
                 }
             }
+        )
+    }
+
+    if (uiState.showAppPicker) {
+        AppPickerDialog(
+            apps = uiState.monitoredApps,
+            onDismiss = { viewModel.hideAppPicker() },
+            onToggleApp = { pkg, isMonitored -> viewModel.toggleAppMonitoring(pkg, isMonitored) }
         )
     }
 
@@ -79,26 +96,55 @@ fun SettingsScreen(
             }
 
             item {
-                Text(
-                    text = "Monitored Apps",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Monitored Apps",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    IconButton(onClick = { viewModel.showAppPicker() }) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_app_btn))
+                    }
+                }
             }
 
-            items(uiState.monitoredApps) { app ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = app.name, style = MaterialTheme.typography.bodyLarge)
-                    Switch(
-                        checked = app.isMonitored,
-                        onCheckedChange = { viewModel.toggleAppMonitoring(app.packageName, it) }
-                    )
+            val activeMonitoredApps = uiState.monitoredApps.filter { it.isMonitored }
+            
+            if (activeMonitoredApps.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.empty_monitored_apps_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Button(onClick = { viewModel.showAppPicker() }) {
+                            Text(stringResource(R.string.add_app_btn))
+                        }
+                    }
+                }
+            } else {
+                items(activeMonitoredApps) { app ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = app.name, style = MaterialTheme.typography.bodyLarge)
+                        Switch(
+                            checked = app.isMonitored,
+                            onCheckedChange = { viewModel.toggleAppMonitoring(app.packageName, it) }
+                        )
+                    }
                 }
             }
             
@@ -109,7 +155,75 @@ fun SettingsScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Reset Data")
+                    Text(stringResource(R.string.reset_data_btn))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppPickerDialog(
+    apps: List<AppItem>,
+    onDismiss: () -> Unit,
+    onToggleApp: (String, Boolean) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredApps = apps.filter { it.name.contains(searchQuery, ignoreCase = true) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                Text(
+                    text = stringResource(R.string.app_picker_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text(stringResource(R.string.search_app_hint)) },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    singleLine = true
+                )
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(filteredApps) { app ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = app.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                            Switch(
+                                checked = app.isMonitored,
+                                onCheckedChange = { onToggleApp(app.packageName, it) }
+                            )
+                        }
+                    }
+                }
+                
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End).padding(top = 16.dp)
+                ) {
+                    Text("Done")
                 }
             }
         }

@@ -18,13 +18,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dumbscrolling.R
 
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel()
+    viewModel: DashboardViewModel = viewModel(),
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -51,7 +55,24 @@ fun DashboardScreen(
                 TotalUsageCard(totalTimeMs = uiState.totalScreenTimeMs)
             }
 
-            if (uiState.appUsages.isNotEmpty()) {
+            if (uiState.isMonitoredAppsEmpty) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.empty_monitored_apps_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Button(onClick = onNavigateToSettings) {
+                            Text(stringResource(R.string.add_app_btn))
+                        }
+                    }
+                }
+            } else if (uiState.appUsages.isNotEmpty()) {
                 item {
                     Text(
                         text = "App Usage",

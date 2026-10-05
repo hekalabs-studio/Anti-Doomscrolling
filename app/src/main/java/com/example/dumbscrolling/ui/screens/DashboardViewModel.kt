@@ -28,7 +28,8 @@ data class AppUsage(
 data class DashboardState(
     val totalScreenTimeMs: Long = 0L,
     val appUsages: List<AppUsage> = emptyList(),
-    val achievements: List<Achievement> = emptyList()
+    val achievements: List<Achievement> = emptyList(),
+    val isMonitoredAppsEmpty: Boolean = true
 )
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
@@ -60,13 +61,27 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         
         val limitMinutes = settingsPrefs.getInt("session_limit_minutes", 15)
         val limitMs = limitMinutes * 60 * 1000L
+        val monitoredSet = settingsPrefs.getStringSet("monitored_apps", emptySet()) ?: emptySet()
+        
+        val editor = usagePrefs.edit()
+        var madeChanges = false
 
         for ((key, value) in allEntries) {
             if (key.startsWith("usage_") && value is Long) {
                 val packageName = key.substringAfter("usage_")
-                appUsages.add(AppUsage(packageName, value, limitMs))
-                totalTime += value
+                if (monitoredSet.contains(packageName)) {
+                    appUsages.add(AppUsage(packageName, value, limitMs))
+                    totalTime += value
+                } else {
+                    // Hapus data lama yang menghitung app tidak dipantau
+                    editor.remove(key)
+                    madeChanges = true
+                }
             }
+        }
+        
+        if (madeChanges) {
+            editor.apply()
         }
         
         // Sort by usage time descending
@@ -78,7 +93,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             it.copy(
                 totalScreenTimeMs = totalTime,
                 appUsages = appUsages,
-                achievements = achievements
+                achievements = achievements,
+                isMonitoredAppsEmpty = monitoredSet.isEmpty()
             )
         }
     }

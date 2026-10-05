@@ -9,6 +9,13 @@
     android:clickable="true"
     android:focusable="true">
 
+    <ImageView
+        android:id="@+id/overlayAppIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/overlayTitle"
         android:layout_width="wrap_content"
@@ -27,6 +34,36 @@
         android:textSize="18sp"
         android:textColor="#DDDDDD"
         android:textAlignment="center"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/overlaySessionLimit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#AAAAAA"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/overlayTotalToday"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#AAAAAA"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/overlayContinueCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#FFCA28"
+        android:textAlignment="center"
+        android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
     <TextView
@@ -44,9 +81,19 @@
         android:id="@+id/btnCloseOverlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/overlay_btn"
+        android:text="@string/overlay_close_app_btn"
         android:backgroundTint="#D32F2F"
         android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btnSecondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/overlay_btn"
+        android:backgroundTint="#00000000"
+        android:textColor="#DDDDDD"
+        android:visibility="gone"
+        android:layout_marginTop="8dp"/>
 
     <LinearLayout
         android:id="@+id/confirmEndLayout"
