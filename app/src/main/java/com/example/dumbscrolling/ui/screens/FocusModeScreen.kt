@@ -27,82 +27,106 @@ fun FocusModeScreen() {
         }
     )
 
-    val isFocusModeActive by viewModel.isFocusModeActive.collectAsState()
+    val currentPhase by viewModel.currentPhase.collectAsState()
     val remainingTimeMs by viewModel.remainingTimeMs.collectAsState()
-    val completedSessions by viewModel.completedSessions.collectAsState()
+    val completedSessionsToday by viewModel.completedSessionsToday.collectAsState()
+    val currentCycle by viewModel.currentCycle.collectAsState()
+    val isPaused by viewModel.isPaused.collectAsState()
+    val totalCycles = viewModel.totalCycles
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Focus Mode") })
+    var showEndSessionDialog by remember { mutableStateOf(false) }
+
+    if (showEndSessionDialog) {
+        AlertDialog(
+            onDismissRequest = { showEndSessionDialog = false },
+            title = { Text("Akhiri Sesi?") },
+            text = { Text("Sesi fokus akan dihentikan dan progres saat ini akan hilang.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.endSession()
+                    showEndSessionDialog = false
+                }) {
+                    Text("Ya, Akhiri")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndSessionDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Total Sesi Hari Ini: $completedSessionsToday",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Text(
+            text = "Siklus $currentCycle dari $totalCycles",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        val phaseText = when (currentPhase) {
+            PomodoroPhase.IDLE -> "Siap untuk Fokus"
+            PomodoroPhase.FOKUS -> "Fokus"
+            PomodoroPhase.ISTIRAHAT_PENDEK -> "Istirahat Pendek"
+            PomodoroPhase.ISTIRAHAT_PANJANG -> "Istirahat Panjang"
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Completed Sessions: $completedSessions",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
 
-            if (isFocusModeActive) {
-                Text(
-                    text = "Focus Mode Active",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = formatTime(remainingTimeMs),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.Light
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Button(
-                    onClick = { viewModel.stopFocusMode() },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Stop Early")
-                }
-            } else {
-                var durationStr by remember { mutableStateOf("25") }
-                
-                Text(
-                    text = "Set Timer (minutes)",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedTextField(
-                    value = durationStr,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) durationStr = it },
-                    singleLine = true,
-                    modifier = Modifier.width(100.dp)
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Button(
-                    onClick = {
-                        val duration = durationStr.toIntOrNull() ?: 25
-                        if (duration > 0) {
-                            viewModel.startFocusMode(duration)
-                        }
+        Text(
+            text = phaseText,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = formatTime(remainingTimeMs),
+            style = MaterialTheme.typography.displayLarge,
+            fontWeight = FontWeight.Light
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        if (currentPhase == PomodoroPhase.IDLE) {
+            Button(onClick = { viewModel.startSession() }) {
+                Text("Mulai")
+            }
+        } else {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (isPaused) {
+                    Button(onClick = { viewModel.startSession() }) {
+                        Text("Lanjut")
                     }
-                ) {
-                    Text("Start Focus Session")
+                } else {
+                    Button(onClick = { viewModel.pauseSession() }) {
+                        Text("Jeda")
+                    }
                 }
+                
+                Button(onClick = { viewModel.skipPhase() }) {
+                    Text("Lewati fase")
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { showEndSessionDialog = true },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Akhiri sesi")
             }
         }
     }

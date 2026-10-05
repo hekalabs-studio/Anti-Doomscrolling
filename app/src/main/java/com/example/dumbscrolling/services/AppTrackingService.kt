@@ -1,13 +1,14 @@
 package com.example.dumbscrolling.services
 
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import androidx.core.app.NotificationCompat
+import com.example.dumbscrolling.MainActivity
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Color
-
 import android.graphics.PixelFormat
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -76,7 +77,6 @@ class AppTrackingService : AccessibilityService() {
     }
     
     private fun loadSettings() {
-        // Load target apps from SharedPreferences Set
         val monitored = settingsPrefs.getStringSet("monitored_apps", null) ?: setOf(
             "com.instagram.android",
             "com.zhiliaoapp.musically",
@@ -87,16 +87,51 @@ class AppTrackingService : AccessibilityService() {
         )
         targetApps = monitored
         
-        // Load time limit
         val limitMinutes = settingsPrefs.getInt("session_limit_minutes", 15)
         timeLimitMs = limitMinutes * 60 * 1000L
+        
+        updateTrackingNotification()
+    }
+
+    private fun updateTrackingNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val trackingChannel = android.app.NotificationChannel(
+                PomodoroService.TRACKING_CHANNEL_ID,
+                "App Tracking",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Notifikasi pemantauan aplikasi aktif"
+            }
+            notificationManager.createNotificationChannel(trackingChannel)
+        }
+
+        if (targetApps.isEmpty()) {
+            notificationManager.cancel(102)
+            return
+        }
+
+        val openIntent = Intent(this, MainActivity::class.java)
+        val openPendingIntent = PendingIntent.getActivity(
+            this, 0, openIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(this, PomodoroService.TRACKING_CHANNEL_ID)
+            .setContentTitle("DumbScrolling aktif")
+            .setContentText("Memantau ${targetApps.size} aplikasi")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(openPendingIntent)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+
+        notificationManager.notify(102, builder.build())
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val packageName = event.packageName?.toString() ?: return
             
-            // Reload settings on each app change in case user changed them
             loadSettings()
             
             if (blacklistedApps.contains(packageName)) return
@@ -104,7 +139,7 @@ class AppTrackingService : AccessibilityService() {
             if (packageName != activePackageName) {
                 Log.d("AppTrackingService", "Active app changed to: $packageName")
                 activePackageName = packageName
-                sessionClosedFlags.remove(packageName) // Reset flag on app open
+                sessionClosedFlags.remove(packageName)
                 handleAppChange(packageName)
             }
         }
@@ -115,21 +150,21 @@ class AppTrackingService : AccessibilityService() {
         removeOverlay()
 
         if (targetApps.contains(packageName)) {
-            val focusModeEndTime = prefs.getLong("focus_mode_end_time_ms", 0L)
-            if (System.currentTimeMillis() < focusModeEndTime) {
-                // Focus mode is active, block immediately
-                showFocusModeOverlay(packageName, focusModeEndTime)
+            val currentPhase = prefs.getString("current_phase", "IDLE")
+            val isPaused = prefs.getBoolean("is_paused", false)
+            
+            if (currentPhase == "FOKUS" && !isPaused) {
+                showFocusModeOverlay(packageName)
                 return
             }
 
             trackingJob = scope.launch {
                 var warned80Percent = false
                 while (isActive) {
-                    delay(1000) // Count every second
+                    delay(1000)
                     val currentUsage = usageStats.getOrDefault(packageName, 0L) + 1000L
                     usageStats[packageName] = currentUsage
                     
-                    // Save to SharedPreferences for the Dashboard
                     val usagePrefs = getSharedPreferences("UsageStatsPrefs", MODE_PRIVATE)
                     usagePrefs.edit().putLong("usage_$packageName", currentUsage).apply()
                     
@@ -157,7 +192,7 @@ class AppTrackingService : AccessibilityService() {
         }
     }
 
-    private fun showFocusModeOverlay(packageName: String, focusModeEndTime: Long) {
+    private fun showFocusModeOverlay(packageName: String) {
         if (overlayView != null) return
         
         Log.d("AppTrackingService", "Showing focus mode overlay for $packageName")
@@ -166,7 +201,7 @@ class AppTrackingService : AccessibilityService() {
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, // Removed FLAG_NOT_FOCUSABLE so it intercepts back gestures and doesn't disappear
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         )
         layoutParams.gravity = Gravity.CENTER
@@ -177,49 +212,51 @@ class AppTrackingService : AccessibilityService() {
         val titleText = overlayView?.findViewById<TextView>(R.id.overlayTitle)
         val messageText = overlayView?.findViewById<TextView>(R.id.overlayMessage)
         val btnClose = overlayView?.findViewById<Button>(R.id.btnCloseOverlay)
-        
         val timerText = overlayView?.findViewById<TextView>(R.id.overlayTimer)
-        val confirmEndLayout = overlayView?.findViewById<android.widget.LinearLayout>(R.id.confirmEndLayout)
-        val btnCancelEnd = overlayView?.findViewById<Button>(R.id.btnCancelEnd)
-        val btnConfirmEnd = overlayView?.findViewById<Button>(R.id.btnConfirmEnd)
+        val btnSecondary = overlayView?.findViewById<Button>(R.id.btnSecondary)
         
-        titleText?.text = getString(R.string.focus_overlay_title)
-        messageText?.text = getString(R.string.focus_overlay_message)
+        // Hide secondary elements
+        btnSecondary?.visibility = View.GONE
+        overlayView?.findViewById<View>(R.id.confirmEndLayout)?.visibility = View.GONE
         
-        // Show timer and End Session button
+        val appName = getAppName(packageName)
+        titleText?.text = "Fokus sedang berjalan"
+        messageText?.text = "Sisa waktu:"
+        
         timerText?.visibility = View.VISIBLE
         btnClose?.visibility = View.VISIBLE
-        btnClose?.text = "Akhiri Sesi"
+        btnClose?.text = "Tutup $appName"
         
         btnClose?.setOnClickListener {
-            btnClose.visibility = View.GONE
-            confirmEndLayout?.visibility = View.VISIBLE
-        }
-        
-        btnCancelEnd?.setOnClickListener {
-            confirmEndLayout?.visibility = View.GONE
-            btnClose?.visibility = View.VISIBLE
-        }
-        
-        btnConfirmEnd?.setOnClickListener {
-            // End session prematurely
-            prefs.edit().putLong("focus_mode_end_time_ms", 0L).apply()
+            val success = this@AppTrackingService.performGlobalAction(GLOBAL_ACTION_HOME)
             removeOverlay()
-            performGlobalAction(GLOBAL_ACTION_HOME)
+            if (!success) {
+                val homeIntent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+                    addCategory(android.content.Intent.CATEGORY_HOME)
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                try {
+                    startActivity(homeIntent)
+                } catch (e: Exception) {
+                    Log.e("AppTrackingService", "Failed to start home intent", e)
+                }
+            }
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(1000)
+                try {
+                    val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                    am.killBackgroundProcesses(packageName)
+                } catch (e: Exception) {
+                    Log.e("AppTrackingService", "Failed to kill background process", e)
+                }
+            }
         }
-
-        overlayView?.setOnTouchListener { _, _ -> true }
         
-        // Handle back button to prevent it from going to the underlying app
+        overlayView?.setOnTouchListener { _, _ -> true }
         overlayView?.isFocusableInTouchMode = true
         overlayView?.requestFocus()
-        overlayView?.setOnKeyListener { _, keyCode, event ->
-            if (keyCode == android.view.KeyEvent.KEYCODE_BACK) {
-                // Consume back press so it doesn't close the underlying app
-                true
-            } else {
-                false
-            }
+        overlayView?.setOnKeyListener { _, keyCode, _ ->
+            keyCode == android.view.KeyEvent.KEYCODE_BACK
         }
 
         try {
@@ -228,11 +265,22 @@ class AppTrackingService : AccessibilityService() {
             Log.e("AppTrackingService", "Failed to add focus overlay", e)
         }
 
-        // Start a job to remove the overlay when focus mode ends and update timer
+        val focusTargetTimeMs = prefs.getLong("focus_target_time_ms", 0L)
+
         trackingJob = scope.launch {
             while (isActive) {
+                val currentPhase = prefs.getString("current_phase", "IDLE")
+                val isPaused = prefs.getBoolean("is_paused", false)
+                
+                if (currentPhase != "FOKUS" || isPaused) {
+                    removeOverlay()
+                    handleAppChange(packageName)
+                    break
+                }
+                
                 val currentTime = System.currentTimeMillis()
-                val remainingMs = focusModeEndTime - currentTime
+                val remainingMs = focusTargetTimeMs - currentTime
+                
                 if (remainingMs <= 0) {
                     removeOverlay()
                     handleAppChange(packageName)
@@ -306,13 +354,30 @@ class AppTrackingService : AccessibilityService() {
         
         btnClose?.text = getString(R.string.overlay_close_app_btn, appName)
         btnClose?.setOnClickListener {
-            removeOverlay()
+            val success = this@AppTrackingService.performGlobalAction(GLOBAL_ACTION_HOME)
             sessionClosedFlags.add(packageName)
-            performGlobalAction(GLOBAL_ACTION_HOME)
+            removeOverlay()
+
+            if (!success) {
+                val homeIntent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+                    addCategory(android.content.Intent.CATEGORY_HOME)
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                try {
+                    startActivity(homeIntent)
+                } catch (e: Exception) {
+                    Log.e("AppTrackingService", "Failed to start home intent", e)
+                }
+            }
+
             CoroutineScope(Dispatchers.IO).launch {
                 delay(1000)
-                val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
-                am.killBackgroundProcesses(packageName)
+                try {
+                    val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                    am.killBackgroundProcesses(packageName)
+                } catch (e: Exception) {
+                    Log.e("AppTrackingService", "Failed to kill background process", e)
+                }
             }
         }
         
@@ -336,7 +401,6 @@ class AppTrackingService : AccessibilityService() {
         val gracePeriodMs = 30_000L
         var remainingMs = gracePeriodMs
         
-        // Let's do a countdown via coroutine
         trackingJob = scope.launch {
             while (remainingMs > 0 && isActive) {
                 if (remainingMs % 10000L == 0L) {
@@ -346,7 +410,6 @@ class AppTrackingService : AccessibilityService() {
                 delay(1000)
                 remainingMs -= 1000
                 
-                // Keep updating usage
                 val currentUsage = usageStats.getOrDefault(packageName, 0L) + 1000L
                 usageStats[packageName] = currentUsage
                 val usagePrefs = getSharedPreferences("UsageStatsPrefs", MODE_PRIVATE)
@@ -369,11 +432,11 @@ class AppTrackingService : AccessibilityService() {
         }
     }
 
-    override fun onInterrupt() {
-        // Leave empty or add non-dismissing logic
-    }
+    override fun onInterrupt() {}
     
     override fun onDestroy() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(102)
         trackingJob?.cancel()
         removeOverlay()
         super.onDestroy()

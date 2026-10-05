@@ -80,6 +80,71 @@ fun SettingsScreen(
                 }
             }
 
+            // Pomodoro Settings Section
+            item {
+                Text(
+                    text = "Pengaturan Pomodoro",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            item {
+                Text(text = "Durasi Fokus: ${uiState.focusDuration} menit")
+                Slider(
+                    value = uiState.focusDuration.toFloat(),
+                    onValueChange = { viewModel.updateFocusDuration(it.toInt()) },
+                    valueRange = 5f..120f,
+                    steps = 114
+                )
+                
+                Text(text = "Istirahat Pendek: ${uiState.shortBreakDuration} menit")
+                Slider(
+                    value = uiState.shortBreakDuration.toFloat(),
+                    onValueChange = { viewModel.updateShortBreakDuration(it.toInt()) },
+                    valueRange = 1f..30f,
+                    steps = 28
+                )
+
+                Text(text = "Istirahat Panjang: ${uiState.longBreakDuration} menit")
+                Slider(
+                    value = uiState.longBreakDuration.toFloat(),
+                    onValueChange = { viewModel.updateLongBreakDuration(it.toInt()) },
+                    valueRange = 5f..60f,
+                    steps = 54
+                )
+
+                Text(text = "Siklus Istirahat Panjang: ${uiState.longBreakCycle} siklus")
+                Slider(
+                    value = uiState.longBreakCycle.toFloat(),
+                    onValueChange = { viewModel.updateLongBreakCycle(it.toInt()) },
+                    valueRange = 1f..10f,
+                    steps = 8
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Auto-mulai fase berikutnya")
+                    Switch(
+                        checked = uiState.autoStartNextPhase,
+                        onCheckedChange = { viewModel.updateAutoStartNextPhase(it) }
+                    )
+                }
+
+                Button(
+                    onClick = { viewModel.restoreDefaultPomodoroSettings() },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+                ) {
+                    Text("Kembalikan default")
+                }
+                
+                Divider(modifier = Modifier.padding(bottom = 24.dp))
+            }
+
             item {
                 Text(
                     text = "Session Limit: ${uiState.sessionLimitMinutes} minutes",

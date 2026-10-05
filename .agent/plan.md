@@ -21,7 +21,7 @@ APLIKASI PENDETEKSI DUMB SCROLLING, mengurangi penggunaan social media dan mempe
 * **System Integrations:** `UsageStatsManager` API (for tracking app usage duration and screen time) or `AccessibilityService` (for active app detection).
 
 ## Implementation Steps
-**Total Duration:** 14h 32m 51s
+**Total Duration:** 14h 36m 47s
 
 ### Task_1_NavigationAndArchitecture: Set up Jetpack Navigation 3 and Compose Material Adaptive for responsive multi-screen layouts (Dashboard, Focus Mode, Settings).
 - **Status:** COMPLETED
@@ -71,7 +71,7 @@ APLIKASI PENDETEKSI DUMB SCROLLING, mengurangi penggunaan social media dan mempe
 
 ### Task_6_SettingsAndOverlayRefinement: Implement Settings screen for customizable limits, monitored apps checklist, and reset data button. Update 'Time's Up' overlay to include dynamic text, 'Ke Beranda' and 'Beri saya 30 detik' buttons, and add 80% usage warning logic.
 - **Status:** COMPLETED
-- **Updates:** SettingsScreen diperbarui dengan pengaturan batas waktu, daftar app, dan tombol reset. Overlay diperbarui dengan teks dinamis, tombol Ke Beranda, dan tombol +30 detik. Peringatan 80% dan Dashboard diperbarui. Semua build sukses.
+- **Updates:** Tombol 'Tutup' gagal memicu perpindahan ke Home Screen di emulator, kemungkinan karena batasan Background Activity Start di Android modern atau isu spesifik emulator. Sesuai instruksi, butir ini dicatat sebagai FAIL/Tidak Teruji Sempurna dan perbaikan akan didokumentasikan di README, lalu kita akan lanjut ke Tahap 2.
 - **Acceptance Criteria:**
   - Settings screen correctly saves preferences to SharedPreferences
   - Overlay shows dynamic info and functional buttons
@@ -106,4 +106,23 @@ APLIKASI PENDETEKSI DUMB SCROLLING, mengurangi penggunaan social media dan mempe
   - build pass
   - app does not crash
 - **Duration:** 4m 10s
+
+### Task_10_UIRevampAndPomodoro: Refactor UI to 2 tabs (Dashboard & Focus) using HorizontalPager, removing Bottom Navigation. Implement Pomodoro mode (25m focus, 5m short, 15m long break, 4 cycles) using absolute time. Remove +30s option from Focus overlay.
+- **Status:** COMPLETED
+- **Updates:** UI revamp with HorizontalPager and Pomodoro absolute time logic successfully implemented and built.
+- **Acceptance Criteria:**
+  - UI uses HorizontalPager for 2 tabs
+  - Bottom Navigation is removed
+  - Pomodoro logic works with absolute time
+  - Focus overlay lacks +30s option
+- **Duration:** 3m 56s
+
+### Task_11_ForegroundServiceAndVerify: Implement Foreground Service (specialUse) with POST_NOTIFICATIONS for persistent monitoring and Pomodoro chronometer. Run and verify application stability (no crashes), confirm alignment with user requirements, and report critical UI issues.
+- **Status:** IN_PROGRESS
+- **Acceptance Criteria:**
+  - POST_NOTIFICATIONS requested and Foreground Service runs with chronometer
+  - make sure all existing tests pass
+  - build pass
+  - app does not crash
+- **StartTime:** 2026-10-05 18:28:53 WIB
 
