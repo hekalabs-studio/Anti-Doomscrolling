@@ -19,6 +19,10 @@ import com.example.dumbscrolling.MainActivity
 
 class PomodoroService : Service() {
 
+    private val prefs by lazy {
+        getSharedPreferences("FocusModePrefs", Context.MODE_PRIVATE)
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -32,29 +36,95 @@ class PomodoroService : Service() {
         val action = intent?.action
         when (action) {
             ACTION_START -> {
-                val targetTimeMs = intent.getLongExtra(EXTRA_TARGET_TIME_MS, 0L)
-                val isFocusPhase = intent.getBooleanExtra(EXTRA_IS_FOCUS_PHASE, true)
-                startForegroundService(targetTimeMs, isFocusPhase)
+                val targetTimeMs = intent.getLongExtra(EXTRA_TARGET_TIME_MS, 0L).let {
+                    if (it > 0) it else prefs.getLong("focus_target_time_ms", 0L)
+                }
+                val isFocusPhase = intent.getBooleanExtra(
+                    EXTRA_IS_FOCUS_PHASE,
+                    prefs.getString("current_phase", "FOKUS") == "FOKUS"
+                )
+                startOrUpdateForeground(targetTimeMs, isFocusPhase, isPaused = false)
             }
             ACTION_PAUSE -> {
-                // Handle pause logic
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
+                val fromUI = intent.getBooleanExtra("FROM_UI", false)
+                if (!fromUI) {
+                    val targetTimeMs = prefs.getLong("focus_target_time_ms", 0L)
+                    val remainingMs = if (targetTimeMs > 0L) {
+                        maxOf(0L, targetTimeMs - System.currentTimeMillis())
+                    } else {
+                        prefs.getLong("remaining_time_when_paused", 0L)
+                    }
+                    prefs.edit()
+                        .putBoolean("is_paused", true)
+                        .putLong("remaining_pause_ms", remainingMs)
+                        .putLong("remaining_time_when_paused", remainingMs)
+                        .putLong("focus_target_time_ms", 0L)
+                        .apply()
+                }
+
+                val remainingMs = prefs.getLong("remaining_time_when_paused", 0L)
+                val isFocusPhase = prefs.getString("current_phase", "FOKUS") == "FOKUS"
+                startOrUpdateForeground(0L, isFocusPhase, isPaused = true, remainingMs = remainingMs)
+            }
+            ACTION_RESUME -> {
+                val fromUI = intent.getBooleanExtra("FROM_UI", false)
+                if (!fromUI) {
+                    val remainingMs = prefs.getLong("remaining_time_when_paused", prefs.getLong("remaining_pause_ms", 0L))
+                    val targetTimeMs = System.currentTimeMillis() + remainingMs
+                    prefs.edit()
+                        .putBoolean("is_paused", false)
+                        .putLong("focus_target_time_ms", targetTimeMs)
+                        .putLong("remaining_time_when_paused", 0L)
+                        .putLong("remaining_pause_ms", 0L)
+                        .apply()
+                }
+
+                val targetTimeMs = prefs.getLong("focus_target_time_ms", 0L)
+                val isFocusPhase = prefs.getString("current_phase", "FOKUS") == "FOKUS"
+                startOrUpdateForeground(targetTimeMs, isFocusPhase, isPaused = false)
             }
             ACTION_END -> {
+                prefs.edit()
+                    .putString("current_phase", "IDLE")
+                    .putLong("focus_target_time_ms", 0L)
+                    .putBoolean("is_paused", false)
+                    .apply()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
             ACTION_PHASE_CHANGED -> {
                 playPhaseChangeFeedback()
+                val currentPhase = prefs.getString("current_phase", "IDLE") ?: "IDLE"
+                if (currentPhase == "IDLE") {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                } else {
+                    val isFocusPhase = currentPhase == "FOKUS"
+                    val isPaused = prefs.getBoolean("is_paused", false)
+                    if (isPaused) {
+                        val remainingMs = prefs.getLong("remaining_time_when_paused", prefs.getLong("remaining_pause_ms", 0L))
+                        startOrUpdateForeground(0L, isFocusPhase, isPaused = true, remainingMs = remainingMs)
+                    } else {
+                        var targetTimeMs = intent.getLongExtra(EXTRA_TARGET_TIME_MS, 0L)
+                        if (targetTimeMs == 0L) {
+                            targetTimeMs = prefs.getLong("focus_target_time_ms", 0L)
+                        }
+                        startOrUpdateForeground(targetTimeMs, isFocusPhase, isPaused = false)
+                    }
+                }
             }
         }
         return START_STICKY
     }
 
-    private fun startForegroundService(targetTimeMs: Long, isFocusPhase: Boolean) {
-        val notification = createNotification(targetTimeMs, isFocusPhase)
-        
+    private fun startOrUpdateForeground(
+        targetTimeMs: Long,
+        isFocusPhase: Boolean,
+        isPaused: Boolean,
+        remainingMs: Long = 0L
+    ) {
+        val notification = createNotification(targetTimeMs, isFocusPhase, isPaused, remainingMs)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ServiceCompat.startForeground(
                 this,
@@ -67,7 +137,12 @@ class PomodoroService : Service() {
         }
     }
 
-    private fun createNotification(targetTimeMs: Long, isFocusPhase: Boolean): Notification {
+    private fun createNotification(
+        targetTimeMs: Long,
+        isFocusPhase: Boolean,
+        isPaused: Boolean,
+        remainingMs: Long = 0L
+    ): Notification {
         val title = if (isFocusPhase) "Fokus Pomodoro" else "Istirahat Pomodoro"
 
         val openIntent = Intent(this, MainActivity::class.java)
@@ -75,33 +150,48 @@ class PomodoroService : Service() {
             this, 0, openIntent, PendingIntent.FLAG_IMMUTABLE
         )
 
-        val pauseIntent = Intent(this, PomodoroService::class.java).apply {
-            action = ACTION_PAUSE
-        }
-        val pausePendingIntent = PendingIntent.getService(
-            this, 1, pauseIntent, PendingIntent.FLAG_IMMUTABLE
-        )
-
         val endIntent = Intent(this, PomodoroService::class.java).apply {
             action = ACTION_END
         }
         val endPendingIntent = PendingIntent.getService(
-            this, 2, endIntent, PendingIntent.FLAG_IMMUTABLE
+            this, 2, endIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val builder = NotificationCompat.Builder(this, POMODORO_CHANNEL_ID)
             .setContentTitle(title)
-            .setContentText("Waktu tersisa")
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: use real app icon
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentIntent(openPendingIntent)
-            .addAction(android.R.drawable.ic_media_pause, "Jeda", pausePendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Akhiri", endPendingIntent)
             .setOngoing(true)
-            .setUsesChronometer(true)
-            .setWhen(targetTimeMs)
-            .setShowWhen(true)
-        
-        builder.setChronometerCountDown(true)
+
+        if (isPaused) {
+            val resumeIntent = Intent(this, PomodoroService::class.java).apply {
+                action = ACTION_RESUME
+            }
+            val resumePendingIntent = PendingIntent.getService(
+                this, 3, resumeIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            builder.setContentText("Di-jeda")
+                .setUsesChronometer(false)
+                .setShowWhen(false)
+                .addAction(android.R.drawable.ic_media_play, "Lanjut", resumePendingIntent)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Akhiri", endPendingIntent)
+        } else {
+            val pauseIntent = Intent(this, PomodoroService::class.java).apply {
+                action = ACTION_PAUSE
+            }
+            val pausePendingIntent = PendingIntent.getService(
+                this, 1, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            builder.setContentText("Waktu tersisa")
+                .setUsesChronometer(true)
+                .setWhen(targetTimeMs)
+                .setShowWhen(true)
+                .setChronometerCountDown(true)
+                .addAction(android.R.drawable.ic_media_pause, "Jeda", pausePendingIntent)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Akhiri", endPendingIntent)
+        }
 
         return builder.build()
     }
@@ -156,6 +246,7 @@ class PomodoroService : Service() {
 
         const val ACTION_START = "com.example.dumbscrolling.ACTION_POMODORO_START"
         const val ACTION_PAUSE = "com.example.dumbscrolling.ACTION_POMODORO_PAUSE"
+        const val ACTION_RESUME = "com.example.dumbscrolling.ACTION_POMODORO_RESUME"
         const val ACTION_END = "com.example.dumbscrolling.ACTION_POMODORO_END"
         const val ACTION_PHASE_CHANGED = "com.example.dumbscrolling.ACTION_POMODORO_PHASE_CHANGED"
 

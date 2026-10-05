@@ -49,7 +49,12 @@ fun AppNavigation() {
                 )
             }
             entry<SettingsRoute> {
-                SettingsScreen()
+                SettingsScreen(
+                    onNavigateBack = { backStack.removeLastOrNull() },
+                    onNavigateToOnboarding = {
+                        backStack.add(OnboardingRoute)
+                    }
+                )
             }
         }
     )

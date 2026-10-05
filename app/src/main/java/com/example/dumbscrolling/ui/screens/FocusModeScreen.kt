@@ -1,32 +1,24 @@
 package com.example.dumbscrolling.ui.screens
 
-import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import java.util.concurrent.TimeUnit
+import com.example.dumbscrolling.R
+
+
+import androidx.compose.ui.text.style.TextDecoration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FocusModeScreen() {
-    val context = LocalContext.current
-    val application = context.applicationContext as Application
-    val viewModel: FocusModeViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return FocusModeViewModel(application) as T
-            }
-        }
-    )
-
+fun FocusModeScreen(
+    viewModel: FocusModeViewModel,
+    onNavigateToSettings: () -> Unit
+) {
     val currentPhase by viewModel.currentPhase.collectAsState()
     val remainingTimeMs by viewModel.remainingTimeMs.collectAsState()
     val completedSessionsToday by viewModel.completedSessionsToday.collectAsState()
@@ -101,7 +93,7 @@ fun FocusModeScreen() {
         
         if (currentPhase == PomodoroPhase.IDLE) {
             Button(onClick = { viewModel.startSession() }) {
-                Text("Mulai")
+                Text(stringResource(R.string.start_focus))
             }
         } else {
             Row(
@@ -129,11 +121,21 @@ fun FocusModeScreen() {
                 Text("Akhiri sesi")
             }
         }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(onClick = onNavigateToSettings) {
+            Text(
+                text = stringResource(R.string.change_in_settings),
+                style = MaterialTheme.typography.bodySmall,
+                textDecoration = TextDecoration.Underline
+            )
+        }
     }
 }
 
 private fun formatTime(ms: Long): String {
-    val minutes = TimeUnit.MILLISECONDS.toMinutes(ms)
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(ms) % 60
+    val totalSeconds = maxOf(0L, (ms + 999) / 1000)
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
     return String.format("%02d:%02d", minutes, seconds)
 }

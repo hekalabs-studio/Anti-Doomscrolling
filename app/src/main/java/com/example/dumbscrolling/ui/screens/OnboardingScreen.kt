@@ -1,9 +1,15 @@
 package com.example.dumbscrolling.ui.screens
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -15,14 +21,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.dumbscrolling.services.AppTrackingService
 import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(onFinish: () -> Unit) {
-    val pagerState = rememberPagerState(pageCount = { 4 })
+    val pagerState = rememberPagerState(pageCount = { 6 })
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var isAccessibilityEnabled by remember { mutableStateOf(isAccessibilityServiceEnabled(context)) }
+    var isNotificationEnabled by remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+        )
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isAccessibilityEnabled = isAccessibilityServiceEnabled(context)
+                isNotificationEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                } else {
+                    true
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -34,15 +73,26 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             ) { page ->
                 when (page) {
                     0 -> OnboardingPage(
-                        title = "Selamat Datang di Dumbscrolling",
+                        title = "Selamat Datang di Anti DumbScroll",
                         description = "Aplikasi ini membantumu mengurangi kebiasaan doomscrolling di media sosial agar hidupmu lebih produktif."
                     )
                     1 -> OnboardingPage(
                         title = "Cara Kerja",
-                        description = "Tetapkan batas waktu harian untuk aplikasi tertentu. Aktifkan Focus Mode saat kamu butuh konsentrasi tanpa gangguan."
+                        description = "1. Tambah aplikasi yang ingin dipantau.\n2. Atur batas waktu harian.\n3. Gunakan Mode Fokus saat butuh konsentrasi tanpa gangguan."
                     )
-                    2 -> AccessibilityPermissionPage()
-                    3 -> FinalPage(onFinish = onFinish)
+                    2 -> AccessibilityPermissionPage(isAccessibilityEnabled)
+                    3 -> NotificationPermissionPage(isNotificationEnabled)
+                    4 -> BatteryOptimizationPage()
+                    5 -> FinalPage(
+                        isAccessibilityEnabled = isAccessibilityEnabled,
+                        isNotificationEnabled = isNotificationEnabled,
+                        onFinish = onFinish,
+                        onGoBackToPermissions = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(2)
+                            }
+                        }
+                    )
                 }
             }
 
@@ -67,7 +117,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 }
 
                 Row(horizontalArrangement = Arrangement.Center) {
-                    repeat(4) { iteration ->
+                    repeat(6) { iteration ->
                         val color = if (pagerState.currentPage == iteration) 
                             MaterialTheme.colorScheme.primary 
                         else 
@@ -82,13 +132,13 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                     }
                 }
 
-                if (pagerState.currentPage < 3) {
+                if (pagerState.currentPage < 5) {
                     TextButton(onClick = {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)
                         }
                     }) {
-                        Text("Lanjut")
+                        Text(if (pagerState.currentPage in 3..4) "Lewati/Lanjut" else "Lanjut")
                     }
                 } else {
                     Spacer(modifier = Modifier.width(8.dp))
@@ -124,7 +174,7 @@ fun OnboardingPage(title: String, description: String) {
 }
 
 @Composable
-fun AccessibilityPermissionPage() {
+fun AccessibilityPermissionPage(isEnabled: Boolean) {
     val context = LocalContext.current
     
     Column(
@@ -135,53 +185,52 @@ fun AccessibilityPermissionPage() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Izin Aksesibilitas",
+            text = "Izin Aksesibilitas (Wajib)",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         Text(
-            text = "Dumbscrolling memerlukan izin aksesibilitas (Accessibility) untuk mendeteksi kapan aplikasi media sosial sedang dibuka, sehingga kami bisa menghitung waktu dan memblokirnya.",
+            text = "Anti DumbScroll membaca nama paket aplikasi (package name) yang sedang Anda buka untuk memblokirnya jika melewati batas. Data Anda aman dan hanya diproses di perangkat.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        Text(
+            text = "Status: ${if (isEnabled) "Aktif" else "Belum Aktif"}",
+            style = MaterialTheme.typography.titleMedium,
+            color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(bottom = 24.dp)
         )
         Button(onClick = {
             context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }) {
             Text("Buka Pengaturan Aksesibilitas")
         }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Text(
+                text = "Hint (Android 13+): Jika tombol abu-abu, buka Pengaturan HP -> Aplikasi -> Anti DumbScroll -> Izinkan pengaturan terbatas.",
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
     }
 }
 
 @Composable
-fun FinalPage(onFinish: () -> Unit) {
-    val context = LocalContext.current
-    
-    // Lifecycle trick to check permission repeatedly when coming back from settings
-    var hasPermission by remember { mutableStateOf(isAccessibilityServiceEnabled(context)) }
-    
-    DisposableEffect(Unit) {
-        // We could use a more robust way to check when resuming, but for now we'll just check on compose
-        val interval = 1000L
-        val handler = android.os.Handler(android.os.Looper.getMainLooper())
-        val runnable = object : Runnable {
-            override fun run() {
-                val currentPermission = isAccessibilityServiceEnabled(context)
-                if (currentPermission != hasPermission) {
-                    hasPermission = currentPermission
-                }
-                handler.postDelayed(this, interval)
-            }
-        }
-        handler.post(runnable)
-        
-        onDispose {
-            handler.removeCallbacks(runnable)
-        }
-    }
+fun NotificationPermissionPage(isEnabled: Boolean) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { /* state will update in ON_RESUME */ }
+    )
 
     Column(
         modifier = Modifier
@@ -191,16 +240,118 @@ fun FinalPage(onFinish: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Siap Digunakan!",
+            text = "Izin Notifikasi",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Text(
+            text = "Kami memerlukan izin notifikasi untuk memberi tahu Anda saat sesi fokus selesai atau saat aplikasi diblokir.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        Text(
+            text = "Status: ${if (isEnabled) "Aktif" else "Belum Aktif"}",
+            style = MaterialTheme.typography.titleMedium,
+            color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Button(onClick = {
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }) {
+                Text("Minta Izin Notifikasi")
+            }
+        }
+    }
+}
+
+@Composable
+fun BatteryOptimizationPage() {
+    val context = LocalContext.current
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Optimasi Baterai",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Text(
+            text = "Agar pemantauan tidak dihentikan oleh sistem, izinkan aplikasi ini berjalan di latar belakang tanpa batasan baterai.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        Button(onClick = {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+            }
+            context.startActivity(intent)
+        }) {
+            Text("Buka Info Aplikasi")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Text(
+                text = "Hint: Di Xiaomi/Oppo/Vivo, pastikan 'Mulai Otomatis' atau izin berjalan di latar belakang diberikan.",
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun FinalPage(
+    isAccessibilityEnabled: Boolean,
+    isNotificationEnabled: Boolean,
+    onFinish: () -> Unit,
+    onGoBackToPermissions: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Selesai!",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
-        if (hasPermission) {
+        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Ringkasan Izin:", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                Text("- Aksesibilitas: ${if (isAccessibilityEnabled) "Aktif" else "Belum Aktif"}")
+                Text("- Notifikasi: ${if (isNotificationEnabled) "Aktif" else "Belum Aktif"}")
+            }
+        }
+        
+        if (isAccessibilityEnabled) {
             Text(
-                text = "Hebat! Izin aksesibilitas sudah aktif.",
+                text = "Aplikasi sudah siap digunakan!",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary,
@@ -211,16 +362,14 @@ fun FinalPage(onFinish: () -> Unit) {
             }
         } else {
             Text(
-                text = "Menunggu izin aksesibilitas. Harap berikan izin terlebih dahulu agar aplikasi dapat bekerja.",
+                text = "Izin Aksesibilitas diwajibkan untuk memantau aplikasi. Harap aktifkan terlebih dahulu.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
-            Button(onClick = {
-                context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-            }) {
-                Text("Buka Pengaturan Aksesibilitas")
+            Button(onClick = onGoBackToPermissions) {
+                Text("Kembali ke langkah izin")
             }
         }
     }

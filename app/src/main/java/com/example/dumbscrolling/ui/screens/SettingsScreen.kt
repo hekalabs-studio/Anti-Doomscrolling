@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -24,6 +25,8 @@ import com.example.dumbscrolling.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onNavigateBack: () -> Unit = {},
+    onNavigateToOnboarding: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -55,7 +58,21 @@ fun SettingsScreen(
         )
     }
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Pengaturan") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali"
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,14 +80,6 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            item {
-                Text(
-                    text = "Settings",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-            }
-
             item {
                 Button(
                     onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
@@ -215,6 +224,14 @@ fun SettingsScreen(
             
             item {
                 Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = onNavigateToOnboarding,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Lihat tutorial lagi")
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { viewModel.showResetDialog() },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),

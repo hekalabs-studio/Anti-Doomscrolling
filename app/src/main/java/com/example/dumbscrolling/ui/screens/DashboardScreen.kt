@@ -18,19 +18,124 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.DisposableEffect
+import android.content.Intent
+import android.provider.Settings
 import com.example.dumbscrolling.R
 
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(),
+    focusModeViewModel: FocusModeViewModel,
     onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isAccessibilityEnabled by remember { 
+        mutableStateOf(isAccessibilityServiceEnabled(context)) 
+    }
+    
+    val prefs = context.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+    val focusDuration = prefs.getInt("focus_duration", 25)
+    val shortBreakDuration = prefs.getInt("short_break_duration", 5)
+    
+    val currentPhase by focusModeViewModel.currentPhase.collectAsState()
+    val remainingTimeMs by focusModeViewModel.remainingTimeMs.collectAsState()
+    val isPaused by focusModeViewModel.isPaused.collectAsState()
+    var showEndSessionDialog by remember { mutableStateOf(false) }
+    var showNoAppsDialog by remember { mutableStateOf(false) }
+    var showAccessibilityDialog by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isAccessibilityEnabled = isAccessibilityServiceEnabled(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    if (showEndSessionDialog) {
+        AlertDialog(
+            onDismissRequest = { showEndSessionDialog = false },
+            title = { Text("Akhiri Sesi?") },
+            text = { Text("Sesi fokus akan dihentikan dan progres saat ini akan hilang.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    focusModeViewModel.endSession()
+                    showEndSessionDialog = false
+                }) {
+                    Text("Ya, Akhiri")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndSessionDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+
+    if (showNoAppsDialog) {
+        AlertDialog(
+            onDismissRequest = { showNoAppsDialog = false },
+            title = { Text(stringResource(R.string.nav_focus)) },
+            text = { Text(stringResource(R.string.no_monitored_apps_focus)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNoAppsDialog = false
+                    focusModeViewModel.startSession()
+                }) {
+                    Text(stringResource(R.string.continue_anyway))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showNoAppsDialog = false
+                    onNavigateToSettings()
+                }) {
+                    Text(stringResource(R.string.add_apps))
+                }
+            }
+        )
+    }
+
+    if (showAccessibilityDialog) {
+        AlertDialog(
+            onDismissRequest = { showAccessibilityDialog = false },
+            title = { Text(stringResource(R.string.nav_focus)) },
+            text = { Text(stringResource(R.string.accessibility_required)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showAccessibilityDialog = false
+                    context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }) {
+                    Text(stringResource(R.string.enable_service))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAccessibilityDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
 
     Scaffold { innerPadding ->
         LazyColumn(
@@ -41,6 +146,30 @@ fun DashboardScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
+            if (!isAccessibilityEnabled) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Pemantauan tidak aktif! Aplikasi tidak bisa membatasi penggunaan.",
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Button(
+                                onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Text("Aktifkan", color = MaterialTheme.colorScheme.onError)
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 Text(
                     text = "Dashboard",
@@ -49,6 +178,93 @@ fun DashboardScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+            }
+
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (currentPhase == PomodoroPhase.IDLE) {
+                            Text(
+                                text = stringResource(R.string.start_focus),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.focus_summary, focusDuration, shortBreakDuration),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = {
+                                if (!isAccessibilityEnabled) {
+                                    showAccessibilityDialog = true
+                                } else if (uiState.isMonitoredAppsEmpty) {
+                                    showNoAppsDialog = true
+                                } else {
+                                    focusModeViewModel.startSession()
+                                }
+                            }) {
+                                Text(stringResource(R.string.start_focus))
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextButton(onClick = onNavigateToSettings) {
+                                Text(
+                                    text = stringResource(R.string.change_in_settings),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                                )
+                            }
+                        } else {
+                            val phaseText = when (currentPhase) {
+                                PomodoroPhase.FOKUS -> "Fokus"
+                                PomodoroPhase.ISTIRAHAT_PENDEK -> "Istirahat Pendek"
+                                PomodoroPhase.ISTIRAHAT_PANJANG -> "Istirahat Panjang"
+                                else -> ""
+                            }
+                            Text(
+                                text = phaseText,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val totalSeconds = (remainingTimeMs / 1000).coerceAtLeast(0)
+                            val m = totalSeconds / 60
+                            val s = totalSeconds % 60
+                            Text(
+                                text = String.format("%02d:%02d", m, s),
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Light
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (isPaused) {
+                                    Button(onClick = { focusModeViewModel.startSession() }) {
+                                        Text("Lanjut")
+                                    }
+                                } else {
+                                    Button(onClick = { focusModeViewModel.pauseSession() }) {
+                                        Text("Jeda")
+                                    }
+                                }
+                                Button(
+                                    onClick = { showEndSessionDialog = true },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                ) {
+                                    Text("Akhiri")
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             item {

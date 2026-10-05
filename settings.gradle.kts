@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Dumbscrolling"
+rootProject.name = "Anti DumbScroll"
 include(":app")

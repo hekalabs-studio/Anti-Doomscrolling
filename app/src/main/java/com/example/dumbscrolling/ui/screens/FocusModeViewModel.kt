@@ -2,8 +2,13 @@ package com.example.dumbscrolling.ui.screens
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dumbscrolling.services.PomodoroService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +22,7 @@ enum class PomodoroPhase {
 class FocusModeViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("FocusModePrefs", Context.MODE_PRIVATE)
     private val settingsPrefs = application.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
-    
+
     private val _remainingTimeMs = MutableStateFlow(0L)
     val remainingTimeMs: StateFlow<Long> = _remainingTimeMs.asStateFlow()
 
@@ -34,12 +39,70 @@ class FocusModeViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _isPaused = MutableStateFlow(prefs.getBoolean("is_paused", false))
     val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
-    
+
     val totalCycles: Int
         get() = settingsPrefs.getInt("long_break_cycle", 4)
 
+    private var countdownJob: Job? = null
+    private var currentEndTime = 0L
+
+    private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            "current_phase" -> {
+                val phaseName = prefs.getString("current_phase", PomodoroPhase.IDLE.name) ?: PomodoroPhase.IDLE.name
+                val newPhase = runCatching { PomodoroPhase.valueOf(phaseName) }.getOrDefault(PomodoroPhase.IDLE)
+                _currentPhase.value = newPhase
+                if (newPhase == PomodoroPhase.IDLE) {
+                    countdownJob?.cancel()
+                    _isPaused.value = false
+                    _remainingTimeMs.value = getPhaseDurationMs(PomodoroPhase.FOKUS)
+                }
+            }
+            "is_paused" -> {
+                val paused = prefs.getBoolean("is_paused", false)
+                _isPaused.value = paused
+                if (paused) {
+                    countdownJob?.cancel()
+                    _remainingTimeMs.value = prefs.getLong("remaining_time_when_paused", prefs.getLong("remaining_pause_ms", 0L))
+                } else {
+                    val endTime = prefs.getLong("focus_target_time_ms", 0L)
+                    val currentTime = System.currentTimeMillis()
+                    if (endTime > currentTime && _currentPhase.value != PomodoroPhase.IDLE) {
+                        startCountdown(endTime)
+                    }
+                }
+            }
+            "remaining_time_when_paused", "remaining_pause_ms" -> {
+                if (_isPaused.value) {
+                    _remainingTimeMs.value = prefs.getLong("remaining_time_when_paused", prefs.getLong("remaining_pause_ms", 0L))
+                }
+            }
+            "current_cycle" -> {
+                _currentCycle.value = prefs.getInt("current_cycle", 1)
+            }
+            "completed_sessions_today" -> {
+                _completedSessionsToday.value = prefs.getInt("completed_sessions_today", 0)
+            }
+            "focus_target_time_ms" -> {
+                if (!_isPaused.value && _currentPhase.value != PomodoroPhase.IDLE) {
+                    val endTime = prefs.getLong("focus_target_time_ms", 0L)
+                    val currentTime = System.currentTimeMillis()
+                    if (endTime > currentTime) {
+                        startCountdown(endTime)
+                    }
+                }
+            }
+        }
+    }
+
     init {
+        prefs.registerOnSharedPreferenceChangeListener(prefChangeListener)
         checkStatus()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        prefs.unregisterOnSharedPreferenceChangeListener(prefChangeListener)
     }
 
     private fun checkStatus() {
@@ -49,11 +112,11 @@ class FocusModeViewModel(application: Application) : AndroidViewModel(applicatio
         }
 
         if (_isPaused.value) {
-            _remainingTimeMs.value = prefs.getLong("remaining_time_when_paused", 0L)
+            _remainingTimeMs.value = prefs.getLong("remaining_time_when_paused", prefs.getLong("remaining_pause_ms", 0L))
         } else {
             val endTime = prefs.getLong("focus_target_time_ms", 0L)
             val currentTime = System.currentTimeMillis()
-            
+
             if (endTime > currentTime) {
                 startCountdown(endTime)
             } else if (endTime > 0) {
@@ -63,16 +126,21 @@ class FocusModeViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun startCountdown(endTime: Long) {
-        viewModelScope.launch {
+        if (countdownJob?.isActive == true && currentEndTime == endTime) return
+        currentEndTime = endTime
+        
+        countdownJob?.cancel()
+        countdownJob = viewModelScope.launch {
             while (_currentPhase.value != PomodoroPhase.IDLE && !_isPaused.value) {
                 val currentTime = System.currentTimeMillis()
                 val remaining = endTime - currentTime
                 if (remaining <= 0) {
+                    _remainingTimeMs.value = 0L
                     completePhase()
                     break
                 }
                 _remainingTimeMs.value = remaining
-                delay(100) // check more frequently for smooth UI
+                delay(100)
             }
         }
     }
@@ -87,32 +155,88 @@ class FocusModeViewModel(application: Application) : AndroidViewModel(applicatio
         return minutes * 60 * 1000L
     }
 
+    private fun sendServiceIntent(action: String, targetTimeMs: Long = 0L, isFocusPhase: Boolean = true) {
+        val intent = Intent(getApplication(), PomodoroService::class.java).apply {
+            this.action = action
+            putExtra(PomodoroService.EXTRA_TARGET_TIME_MS, targetTimeMs)
+            putExtra(PomodoroService.EXTRA_IS_FOCUS_PHASE, isFocusPhase)
+            putExtra("FROM_UI", true)
+        }
+        ContextCompat.startForegroundService(getApplication(), intent)
+    }
+
     fun startSession() {
         if (_currentPhase.value == PomodoroPhase.IDLE) {
-            setPhase(PomodoroPhase.FOKUS)
+            _currentPhase.value = PomodoroPhase.FOKUS
         }
-        
-        val durationMs = if (_isPaused.value) {
-            _remainingTimeMs.value
-        } else {
-            getPhaseDurationMs(_currentPhase.value)
+
+        if (_isPaused.value) {
+            resumeSession()
+            return
         }
-        
-        _isPaused.value = false
-        prefs.edit().putBoolean("is_paused", false).apply()
-        
+
+        countdownJob?.cancel()
+
+        val durationMs = getPhaseDurationMs(_currentPhase.value)
         val endTime = System.currentTimeMillis() + durationMs
-        prefs.edit().putLong("focus_target_time_ms", endTime).apply()
-        
+
+        _isPaused.value = false
+        _remainingTimeMs.value = durationMs
+
+        prefs.edit()
+            .putString("current_phase", _currentPhase.value.name)
+            .putBoolean("is_paused", false)
+            .putLong("focus_target_time_ms", endTime)
+            .putLong("remaining_time_when_paused", 0L)
+            .putLong("remaining_pause_ms", 0L)
+            .putInt("current_cycle", _currentCycle.value)
+            .apply()
+
         startCountdown(endTime)
+        sendServiceIntent(PomodoroService.ACTION_START, endTime, _currentPhase.value == PomodoroPhase.FOKUS)
     }
 
     fun pauseSession() {
         if (_currentPhase.value == PomodoroPhase.IDLE) return
-        
+
+        countdownJob?.cancel()
+
         _isPaused.value = true
-        prefs.edit().putBoolean("is_paused", true).apply()
-        prefs.edit().putLong("remaining_time_when_paused", _remainingTimeMs.value).apply()
+        val remaining = _remainingTimeMs.value
+
+        prefs.edit()
+            .putString("current_phase", _currentPhase.value.name)
+            .putBoolean("is_paused", true)
+            .putLong("focus_target_time_ms", 0L)
+            .putLong("remaining_time_when_paused", remaining)
+            .putLong("remaining_pause_ms", remaining)
+            .putInt("current_cycle", _currentCycle.value)
+            .apply()
+
+        sendServiceIntent(PomodoroService.ACTION_PAUSE)
+    }
+
+    fun resumeSession() {
+        if (_currentPhase.value == PomodoroPhase.IDLE || !_isPaused.value) return
+
+        countdownJob?.cancel()
+
+        val durationMs = _remainingTimeMs.value
+        val endTime = System.currentTimeMillis() + durationMs
+
+        _isPaused.value = false
+
+        prefs.edit()
+            .putString("current_phase", _currentPhase.value.name)
+            .putBoolean("is_paused", false)
+            .putLong("focus_target_time_ms", endTime)
+            .putLong("remaining_time_when_paused", 0L)
+            .putLong("remaining_pause_ms", 0L)
+            .putInt("current_cycle", _currentCycle.value)
+            .apply()
+
+        startCountdown(endTime)
+        sendServiceIntent(PomodoroService.ACTION_RESUME, endTime, _currentPhase.value == PomodoroPhase.FOKUS)
     }
 
     fun skipPhase() {
@@ -120,67 +244,101 @@ class FocusModeViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun endSession() {
-        setPhase(PomodoroPhase.IDLE)
+        countdownJob?.cancel()
+
+        _currentPhase.value = PomodoroPhase.IDLE
         _isPaused.value = false
         _currentCycle.value = 1
-        
+        _remainingTimeMs.value = getPhaseDurationMs(PomodoroPhase.FOKUS)
+
         prefs.edit()
-            .putLong("focus_target_time_ms", 0L)
+            .putString("current_phase", PomodoroPhase.IDLE.name)
             .putBoolean("is_paused", false)
+            .putLong("focus_target_time_ms", 0L)
+            .putLong("remaining_time_when_paused", 0L)
+            .putLong("remaining_pause_ms", 0L)
             .putInt("current_cycle", 1)
             .apply()
-            
-        _remainingTimeMs.value = getPhaseDurationMs(PomodoroPhase.FOKUS)
+
+        sendServiceIntent(PomodoroService.ACTION_END)
     }
 
     private fun completePhase() {
+        countdownJob?.cancel()
+
+        var newCompleted = _completedSessionsToday.value
         if (_currentPhase.value == PomodoroPhase.FOKUS) {
-            val newCompleted = _completedSessionsToday.value + 1
+            newCompleted += 1
             _completedSessionsToday.value = newCompleted
-            prefs.edit().putInt("completed_sessions_today", newCompleted).apply()
         }
 
+        var nextCycle = _currentCycle.value
         val nextPhase = when (_currentPhase.value) {
             PomodoroPhase.FOKUS -> {
-                if (_currentCycle.value >= totalCycles) {
+                if (nextCycle >= totalCycles) {
                     PomodoroPhase.ISTIRAHAT_PANJANG
                 } else {
                     PomodoroPhase.ISTIRAHAT_PENDEK
                 }
             }
             PomodoroPhase.ISTIRAHAT_PENDEK -> {
-                _currentCycle.value += 1
-                prefs.edit().putInt("current_cycle", _currentCycle.value).apply()
+                nextCycle += 1
+                _currentCycle.value = nextCycle
                 PomodoroPhase.FOKUS
             }
             PomodoroPhase.ISTIRAHAT_PANJANG -> {
+                nextCycle = 1
                 _currentCycle.value = 1
-                prefs.edit().putInt("current_cycle", 1).apply()
                 PomodoroPhase.FOKUS
             }
             PomodoroPhase.IDLE -> PomodoroPhase.FOKUS
         }
 
-        setPhase(nextPhase)
-        
+        if (nextPhase == PomodoroPhase.IDLE) {
+            endSession()
+            return
+        }
+
+        _currentPhase.value = nextPhase
+
         val autoStart = settingsPrefs.getBoolean("auto_start_next_phase", false)
+        val isFocus = nextPhase == PomodoroPhase.FOKUS
+
+        val isPaused: Boolean
+        val targetTime: Long
+        val remainingMs: Long
+
         if (autoStart) {
             val durationMs = getPhaseDurationMs(nextPhase)
-            val endTime = System.currentTimeMillis() + durationMs
-            prefs.edit().putLong("focus_target_time_ms", endTime).apply()
-            startCountdown(endTime)
+            targetTime = System.currentTimeMillis() + durationMs
+            isPaused = false
+            remainingMs = durationMs
+            _isPaused.value = false
+            _remainingTimeMs.value = durationMs
         } else {
+            val durationMs = getPhaseDurationMs(nextPhase)
+            targetTime = 0L
+            isPaused = true
+            remainingMs = durationMs
             _isPaused.value = true
-            _remainingTimeMs.value = getPhaseDurationMs(nextPhase)
-            prefs.edit()
-                .putBoolean("is_paused", true)
-                .putLong("remaining_time_when_paused", _remainingTimeMs.value)
-                .apply()
+            _remainingTimeMs.value = durationMs
         }
-    }
 
-    private fun setPhase(phase: PomodoroPhase) {
-        _currentPhase.value = phase
-        prefs.edit().putString("current_phase", phase.name).apply()
+        prefs.edit()
+            .putString("current_phase", nextPhase.name)
+            .putBoolean("is_paused", isPaused)
+            .putLong("focus_target_time_ms", targetTime)
+            .putLong("remaining_time_when_paused", remainingMs)
+            .putLong("remaining_pause_ms", remainingMs)
+            .putInt("current_cycle", nextCycle)
+            .putInt("completed_sessions_today", newCompleted)
+            .apply()
+
+        if (autoStart) {
+            startCountdown(targetTime)
+            sendServiceIntent(PomodoroService.ACTION_PHASE_CHANGED, targetTime, isFocus)
+        } else {
+            sendServiceIntent(PomodoroService.ACTION_PHASE_CHANGED, 0L, isFocus)
+        }
     }
 }

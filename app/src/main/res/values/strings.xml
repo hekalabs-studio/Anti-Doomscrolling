@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dumbscrolling</string>
+    <string name="app_name">Anti DumbScroll</string>
     <string name="accessibility_service_description">Layanan ini memantau aplikasi aktif untuk memblokir penggunaan media sosial setelah batas waktu yang ditentukan.</string>
     <string name="overlay_title">Waktu Habis!</string>
     <string name="overlay_message">Kamu sudah terlalu lama scrolling. Waktunya fokus ke hal lain!</string>
@@ -17,4 +17,14 @@
     <string name="app_picker_title">Pilih Aplikasi</string>
     <string name="search_app_hint">Cari aplikasi&#8230;</string>
     <string name="reset_data_btn">Reset Data</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_focus">Fokus</string>
+    <string name="start_focus">Mulai Fokus</string>
+    <string name="focus_summary">%1$d menit fokus · %2$d menit istirahat</string>
+    <string name="change_in_settings">Ubah di Pengaturan</string>
+    <string name="accessibility_required">Pemblokiran butuh layanan aktif</string>
+    <string name="enable_service">Aktifkan Layanan</string>
+    <string name="no_monitored_apps_focus">Belum ada aplikasi yang dipantau. Timer tidak akan memblokir apa pun.</string>
+    <string name="add_apps">Tambahkan Aplikasi</string>
+    <string name="continue_anyway">Tetap Mulai</string>
 </resources>
