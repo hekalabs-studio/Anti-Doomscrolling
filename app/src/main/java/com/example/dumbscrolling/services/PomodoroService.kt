@@ -16,12 +16,28 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.example.dumbscrolling.MainActivity
+import com.example.dumbscrolling.widget.FocusWidgetProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import javax.inject.Named
+import android.content.SharedPreferences
 
+@AndroidEntryPoint
 class PomodoroService : Service() {
 
-    private val prefs by lazy {
-        getSharedPreferences("FocusModePrefs", Context.MODE_PRIVATE)
-    }
+    @Inject
+    @Named("FocusPrefs")
+    lateinit var prefs: SharedPreferences
+
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var timerJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -89,6 +105,8 @@ class PomodoroService : Service() {
                     .putLong("focus_target_time_ms", 0L)
                     .putBoolean("is_paused", false)
                     .apply()
+                timerJob?.cancel()
+                FocusWidgetProvider.updateWidget(this, "Siap", "--:--")
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
@@ -96,6 +114,8 @@ class PomodoroService : Service() {
                 playPhaseChangeFeedback()
                 val currentPhase = prefs.getString("current_phase", "IDLE") ?: "IDLE"
                 if (currentPhase == "IDLE") {
+                    timerJob?.cancel()
+                    FocusWidgetProvider.updateWidget(this, "Siap", "--:--")
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                 } else {
@@ -135,6 +155,43 @@ class PomodoroService : Service() {
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
+
+        updateWidgetState(targetTimeMs, isPaused, remainingMs)
+    }
+
+    private fun updateWidgetState(targetTimeMs: Long, isPaused: Boolean, remainingMs: Long) {
+        timerJob?.cancel()
+        val phase = prefs.getString("current_phase", "IDLE") ?: "IDLE"
+        
+        if (phase == "IDLE") {
+            FocusWidgetProvider.updateWidget(this, "Siap", "--:--")
+        } else if (isPaused) {
+            val timeToDisplay = if (remainingMs > 0) remainingMs else {
+                val rem = prefs.getLong("remaining_time_when_paused", 0L)
+                if (rem > 0) rem else 0L
+            }
+            FocusWidgetProvider.updateWidget(this, "Di-jeda", formatTime(timeToDisplay))
+        } else {
+            timerJob = serviceScope.launch {
+                while (true) {
+                    val current = System.currentTimeMillis()
+                    val rem = targetTimeMs - current
+                    if (rem <= 0) {
+                        FocusWidgetProvider.updateWidget(this@PomodoroService, "Siap", "--:--")
+                        break
+                    }
+                    FocusWidgetProvider.updateWidget(this@PomodoroService, phase, formatTime(rem))
+                    delay(1000)
+                }
+            }
+        }
+    }
+
+    private fun formatTime(ms: Long): String {
+        val totalSeconds = ms / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
     private fun createNotification(
@@ -252,5 +309,10 @@ class PomodoroService : Service() {
 
         const val EXTRA_TARGET_TIME_MS = "extra_target_time_ms"
         const val EXTRA_IS_FOCUS_PHASE = "extra_is_focus_phase"
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
     }
 }

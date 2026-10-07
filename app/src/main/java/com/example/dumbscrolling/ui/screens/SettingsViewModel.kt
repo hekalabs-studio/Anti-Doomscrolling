@@ -3,13 +3,21 @@ package com.example.dumbscrolling.ui.screens
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.dumbscrolling.data.StatsDao
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Named
 
 data class AppItem(
     val packageName: String,
@@ -24,15 +32,24 @@ data class SettingsState(
     val longBreakDuration: Int = 15,
     val longBreakCycle: Int = 4,
     val autoStartNextPhase: Boolean = false,
+    val isScheduleEnabled: Boolean = false,
+    val scheduleStartHour: Int = 22,
+    val scheduleStartMinute: Int = 0,
+    val scheduleEndHour: Int = 6,
+    val scheduleEndMinute: Int = 0,
     val monitoredApps: List<AppItem> = emptyList(),
     val showResetDialog: Boolean = false,
     val showAppPicker: Boolean = false
 )
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val prefs = application.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
-    private val usagePrefs = application.getSharedPreferences("UsageStatsPrefs", Context.MODE_PRIVATE)
-    private val focusPrefs = application.getSharedPreferences("FocusModePrefs", Context.MODE_PRIVATE)
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    application: Application,
+    @Named("SettingsPrefs") private val prefs: SharedPreferences,
+    @Named("UsagePrefs") private val usagePrefs: SharedPreferences,
+    @Named("FocusPrefs") private val focusPrefs: SharedPreferences,
+    private val statsDao: StatsDao
+) : AndroidViewModel(application) {
     
     private val _uiState = MutableStateFlow(SettingsState())
     val uiState: StateFlow<SettingsState> = _uiState.asStateFlow()
@@ -49,6 +66,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val lBreakCycle = prefs.getInt("long_break_cycle", 4)
         val autoStart = prefs.getBoolean("auto_start_next_phase", false)
         
+        val isScheduleEnabled = prefs.getBoolean("is_schedule_enabled", false)
+        val scheduleStartHour = prefs.getInt("schedule_start_hour", 22)
+        val scheduleStartMinute = prefs.getInt("schedule_start_minute", 0)
+        val scheduleEndHour = prefs.getInt("schedule_end_hour", 6)
+        val scheduleEndMinute = prefs.getInt("schedule_end_minute", 0)
+        
         val monitoredSet = prefs.getStringSet("monitored_apps", emptySet()) ?: emptySet()
         val apps = getInstalledApps(monitoredSet)
         
@@ -59,6 +82,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             longBreakDuration = lBreakDuration,
             longBreakCycle = lBreakCycle,
             autoStartNextPhase = autoStart,
+            isScheduleEnabled = isScheduleEnabled,
+            scheduleStartHour = scheduleStartHour,
+            scheduleStartMinute = scheduleStartMinute,
+            scheduleEndHour = scheduleEndHour,
+            scheduleEndMinute = scheduleEndMinute,
             monitoredApps = apps
         ) }
     }
@@ -142,6 +170,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(autoStartNextPhase = autoStart) }
     }
     
+    fun updateScheduleEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("is_schedule_enabled", enabled).apply()
+        _uiState.update { it.copy(isScheduleEnabled = enabled) }
+    }
+    
+    fun updateScheduleStartTime(hour: Int, minute: Int) {
+        prefs.edit()
+            .putInt("schedule_start_hour", hour)
+            .putInt("schedule_start_minute", minute)
+            .apply()
+        _uiState.update { it.copy(scheduleStartHour = hour, scheduleStartMinute = minute) }
+    }
+    
+    fun updateScheduleEndTime(hour: Int, minute: Int) {
+        prefs.edit()
+            .putInt("schedule_end_hour", hour)
+            .putInt("schedule_end_minute", minute)
+            .apply()
+        _uiState.update { it.copy(scheduleEndHour = hour, scheduleEndMinute = minute) }
+    }
+    
     fun restoreDefaultPomodoroSettings() {
         prefs.edit()
             .putInt("focus_duration", 25)
@@ -189,7 +238,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun resetData() {
         usagePrefs.edit().clear().apply()
-        focusPrefs.edit().putInt("focus_session_count", 0).apply()
+
+        val focusEditor = focusPrefs.edit()
+        focusEditor.putInt("focus_session_count", 0)
+        focusEditor.putInt("completed_sessions_today", 0)
+        focusPrefs.all.keys.filter { it.startsWith("continue_count_") }.forEach { key ->
+            focusEditor.remove(key)
+        }
+        focusEditor.apply()
+
+        viewModelScope.launch(Dispatchers.IO) {
+            statsDao.deleteAllStats()
+        }
+
         hideResetDialog()
     }
     

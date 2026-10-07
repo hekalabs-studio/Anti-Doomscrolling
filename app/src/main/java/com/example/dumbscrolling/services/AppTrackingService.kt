@@ -62,6 +62,7 @@ class AppTrackingService : AccessibilityService() {
         prefs = getSharedPreferences("FocusModePrefs", MODE_PRIVATE)
         settingsPrefs = getSharedPreferences("SettingsPrefs", MODE_PRIVATE)
         
+        checkDailyReset()
         loadSettings()
         
         // Restore usage stats
@@ -145,7 +146,30 @@ class AppTrackingService : AccessibilityService() {
         }
     }
     
+    private fun checkDailyReset() {
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        val lastDate = prefs.getString("last_recorded_date", "")
+
+        if (lastDate != today) {
+            val editor = prefs.edit()
+            editor.putString("last_recorded_date", today)
+            prefs.all.keys.filter { it.startsWith("usage_") || it.startsWith("continue_count_") }.forEach { key ->
+                editor.remove(key)
+            }
+            editor.apply()
+
+            val usagePrefs = getSharedPreferences("UsageStatsPrefs", MODE_PRIVATE)
+            val usageEditor = usagePrefs.edit()
+            usagePrefs.all.keys.filter { it.startsWith("usage_") }.forEach { key ->
+                usageEditor.remove(key)
+            }
+            usageEditor.apply()
+            usageStats.clear()
+        }
+    }
+
     private fun handleAppChange(packageName: String) {
+        checkDailyReset()
         trackingJob?.cancel()
         removeOverlay()
 
@@ -162,6 +186,7 @@ class AppTrackingService : AccessibilityService() {
                 var warned80Percent = false
                 while (isActive) {
                     delay(1000)
+                    checkDailyReset()
                     val currentUsage = usageStats.getOrDefault(packageName, 0L) + 1000L
                     usageStats[packageName] = currentUsage
                     

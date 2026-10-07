@@ -19,7 +19,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.example.dumbscrolling.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +29,8 @@ import com.example.dumbscrolling.R
 fun SettingsScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToOnboarding: () -> Unit = {},
-    viewModel: SettingsViewModel = viewModel()
+    onNavigateToAbout: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -86,6 +89,67 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
                 ) {
                     Text("Enable Tracking Service")
+                }
+            }
+
+            // Language Settings Section
+            item {
+                var showLanguageMenu by remember { mutableStateOf(false) }
+                val currentLanguageTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+                val currentLanguageName = when {
+                    currentLanguageTag.contains("id") -> "Bahasa Indonesia"
+                    currentLanguageTag.contains("ru") -> "Русский"
+                    currentLanguageTag.contains("zh") -> "中文"
+                    else -> "English"
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.language_setting),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Box {
+                        TextButton(onClick = { showLanguageMenu = true }) {
+                            Text(currentLanguageName)
+                        }
+                        DropdownMenu(
+                            expanded = showLanguageMenu,
+                            onDismissRequest = { showLanguageMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("English") },
+                                onClick = {
+                                    showLanguageMenu = false
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Bahasa Indonesia") },
+                                onClick = {
+                                    showLanguageMenu = false
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("id"))
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Русский") },
+                                onClick = {
+                                    showLanguageMenu = false
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("中文") },
+                                onClick = {
+                                    showLanguageMenu = false
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("zh"))
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -152,6 +216,77 @@ fun SettingsScreen(
                 }
                 
                 Divider(modifier = Modifier.padding(bottom = 24.dp))
+            }
+            
+            item {
+                Text(
+                    text = stringResource(R.string.setting_schedule_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.setting_schedule_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.setting_schedule_title))
+                    Switch(
+                        checked = uiState.isScheduleEnabled,
+                        onCheckedChange = { viewModel.updateScheduleEnabled(it) }
+                    )
+                }
+                
+                if (uiState.isScheduleEnabled) {
+                    val context = LocalContext.current
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(R.string.setting_start_time))
+                        TextButton(onClick = {
+                            android.app.TimePickerDialog(
+                                context,
+                                { _, hour, minute -> viewModel.updateScheduleStartTime(hour, minute) },
+                                uiState.scheduleStartHour,
+                                uiState.scheduleStartMinute,
+                                true
+                            ).show()
+                        }) {
+                            Text(String.format(java.util.Locale.US, "%02d:%02d", uiState.scheduleStartHour, uiState.scheduleStartMinute))
+                        }
+                    }
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(R.string.setting_end_time))
+                        TextButton(onClick = {
+                            android.app.TimePickerDialog(
+                                context,
+                                { _, hour, minute -> viewModel.updateScheduleEndTime(hour, minute) },
+                                uiState.scheduleEndHour,
+                                uiState.scheduleEndMinute,
+                                true
+                            ).show()
+                        }) {
+                            Text(String.format(java.util.Locale.US, "%02d:%02d", uiState.scheduleEndHour, uiState.scheduleEndMinute))
+                        }
+                    }
+                }
+                
+                Divider(modifier = Modifier.padding(vertical = 24.dp))
             }
 
             item {
@@ -238,6 +373,14 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.reset_data_btn))
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                OutlinedButton(
+                    onClick = onNavigateToAbout,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.about_title))
                 }
             }
         }

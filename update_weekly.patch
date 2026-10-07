@@ -1,0 +1,41 @@
+--- app/src/main/java/com/example/dumbscrolling/services/AppTrackingService.kt
++++ app/src/main/java/com/example/dumbscrolling/services/AppTrackingService.kt
+@@ -197,6 +197,35 @@
+         }
+     }
++
++    private fun updateWeeklyStats(usagePrefs: SharedPreferences) {
++        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
++        val lastDate = usagePrefs.getString("last_recorded_date", today)
++        val weeklyStats = usagePrefs.getString("weekly_stats", "0,0,0,0,0,0,0") ?: "0,0,0,0,0,0,0"
++
++        val statsList = weeklyStats.split(",").map { it.toLongOrNull() ?: 0L }.toMutableList()
++        val editor = usagePrefs.edit()
++
++        if (lastDate != today) {
++            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
++            try {
++                val d1 = sdf.parse(lastDate!!)
++                val d2 = sdf.parse(today)
++                val diffDays = ((d2.time - d1.time) / (1000 * 60 * 60 * 24)).toInt()
++
++                if (diffDays > 0) {
++                    for (i in 0 until Math.min(diffDays, 7)) {
++                        if (statsList.isNotEmpty()) {
++                            statsList.removeAt(0)
++                            statsList.add(0L)
++                        }
++                    }
++                }
++            } catch (e: Exception) {}
++            editor.putString("last_recorded_date", today)
++            usageStats.clear()
++            usagePrefs.all.forEach { (key, _) -> if (key.startsWith("usage_")) editor.remove(key) }
++        }
++
++        statsList[statsList.size - 1] = statsList.last() + 1000L
++        editor.putString("weekly_stats", statsList.joinToString(","))
++        editor.apply()
++    }
+
+     private fun handleAppChange(packageName: String) {

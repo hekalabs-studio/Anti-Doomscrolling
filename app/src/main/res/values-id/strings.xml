@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Anti DumbScroll</string>
+    <string name="accessibility_service_description">Layanan ini memantau aplikasi aktif untuk memblokir penggunaan media sosial setelah batas waktu yang ditentukan.</string>
+    <string name="overlay_title">Waktu Habis!</string>
+    <string name="overlay_message">Kamu sudah terlalu lama scrolling. Waktunya fokus ke hal lain!</string>
+    <string name="overlay_btn">Beri saya 30 detik</string>
+    <string name="focus_overlay_title">Mode Fokus Aktif</string>
+    <string name="focus_overlay_message">Ayo kembali bekerja!</string>
+
+    <string name="empty_monitored_apps_desc">Belum ada aplikasi dipantau. Tambahkan aplikasi untuk mulai.</string>
+    <string name="add_app_btn">Tambahkan aplikasi</string>
+    <string name="overlay_time_spent">Kamu sudah %1$s di %2$s</string>
+    <string name="overlay_session_limit">Batas sesi: %1$d menit</string>
+    <string name="overlay_total_today">Total hari ini: %1$s</string>
+    <string name="overlay_continue_count">Kamu sudah memilih lanjut %1$d kali hari ini</string>
+    <string name="overlay_close_app_btn">Tutup %1$s</string>
+    <string name="app_picker_title">Pilih Aplikasi</string>
+    <string name="search_app_hint">Cari aplikasi&#8230;</string>
+    <string name="reset_data_btn">Reset Data</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_focus">Fokus</string>
+    <string name="start_focus">Mulai Fokus</string>
+    <string name="focus_summary">%1$d menit fokus · %2$d menit istirahat</string>
+    <string name="change_in_settings">Ubah di Pengaturan</string>
+    <string name="accessibility_required">Pemblokiran butuh layanan aktif</string>
+    <string name="enable_service">Aktifkan Layanan</string>
+    <string name="no_monitored_apps_focus">Belum ada aplikasi yang dipantau. Timer tidak akan memblokir apa pun.</string>
+    <string name="add_apps">Tambahkan Aplikasi</string>
+    <string name="continue_anyway">Tetap Mulai</string>
+
+    <string name="support_message_1">Istirahat sejenak itu baik untuk pikiranmu.</string>
+    <string name="support_message_2">Kamu sudah melakukan yang terbaik hari ini. Waktunya bernapas.</string>
+    <string name="support_message_3">Layar bisa menunggu, momen berhargamu di dunia nyata tidak.</string>
+    <string name="support_message_4">Pikiran yang tenang datang dari jeda yang cukup.</string>
+    <string name="support_message_5">Satu langkah kecil menjauh dari layar, satu langkah besar untuk fokusmu.</string>
+    <string name="support_message_6">Kendalikan harimu, jangan biarkan algoritma mengendalikanmu.</string>
+
+    <string name="overlay_title_time_up">Waktu Habis</string>
+    <string name="overlay_session_progress">Progres sesi: %1$d dari %2$d menit</string>
+    <string name="overlay_button_close">Tutup %1$s</string>
+    <string name="overlay_button_extend">Beri saya 30 detik</string>
+    <string name="overlay_wait_seconds">Tunggu %1$d detik...</string>
+    <string name="overlay_remaining_chances">Sisa kesempatan lanjut hari ini: %1$d</string>
+    <string name="overlay_chances_exhausted">Kesempatan lanjut hari ini sudah habis</string>
+    <string name="overlay_start_focus_link">Mulai Fokus 25 menit</string>
+
+    <string name="overlay_focus_title">Fokus Sedang Berjalan</string>
+    <string name="overlay_phase_focus">Fokus</string>
+    <string name="overlay_phase_rest">Istirahat</string>
+    <string name="overlay_cycle_format">Siklus %1$d dari %2$d</string>
+    <string name="overlay_hold_to_end">Tahan 3 detik untuk mengakhiri sesi</string>
+    <string name="overlay_holding">Menahan... %1$d%%</string>
+
+    <string name="about_title">Tentang &amp; Dukungan</string>
+    <string name="about_app_name">Anti DumbScroll</string>
+    <string name="about_copyright">© 2026 Hekalabs Studio</string>
+    <string name="about_license">Dilisensikan di bawah GNU General Public License v3.0 (GPL-3.0)</string>
+    <string name="about_privacy_statement">Privasi Anda aman. Data Anda (waktu, pengaturan) hanya disimpan di perangkat ini. Layanan Aksesibilitas hanya membaca nama aplikasi yang sedang aktif untuk menghitung waktu, bukan membaca isi layar, pesan, atau kata sandi. Tidak ada data yang dikirim ke server.</string>
+    <string name="about_source_code">Kode Sumber (GitHub)</string>
+    <string name="about_contact">Hubungi Kami</string>
+    <string name="about_privacy_policy">Kebijakan Privasi Lengkap</string>
+    <string name="about_credits_title">Kredit &amp; Atribusi</string>
+    <string name="about_credits_gemini_logo">Logo dibuat dengan bantuan Gemini (Google)</string>
+    <string name="about_credits_gemini_dev">Dikembangkan dengan bantuan Gemini di Android Studio</string>
+    <string name="about_credits_libraries">Pustaka Pihak Ketiga:\n- Jetpack Compose (UI &amp; Material 3)\n- Jetpack Navigation\n- Kotlin Coroutines\nSemua pustaka di atas dilisensikan di bawah Apache License 2.0.</string>
+    <string name="about_donate_button">Dukung Pengembangan</string>
+    <string name="about_donate_desc">Kalau app ini membantu, kamu bisa mendukung pengembangannya. Tidak wajib.</string>
+    <string name="error_no_browser">Tidak ada peramban (browser) yang terinstal untuk membuka tautan.</string>
+    <string name="language_setting">Bahasa</string>
+
+    <string name="setting_schedule_title">Jadwal Pemblokiran Otomatis</string>
+    <string name="setting_schedule_desc">Otomatis blokir aplikasi pada jam tidur/kerja</string>
+    <string name="setting_start_time">Jam Mulai</string>
+    <string name="setting_end_time">Jam Selesai</string>
+    <string name="overlay_scheduled_block">Di luar jam akses!</string>
+    <string name="overlay_scheduled_desc">Aplikasi ini otomatis diblokir karena kamu sedang berada dalam rentang Jadwal Otomatis.</string>
+</resources>

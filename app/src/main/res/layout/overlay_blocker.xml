@@ -1,124 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:background="#E6000000"
-    android:padding="32dp"
     android:clickable="true"
-    android:focusable="true">
-
-    <ImageView
-        android:id="@+id/overlayAppIcon"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/overlayTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/overlay_title"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="16dp" />
-
-    <TextView
-        android:id="@+id/overlayMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/overlay_message"
-        android:textSize="18sp"
-        android:textColor="#DDDDDD"
-        android:textAlignment="center"
-        android:layout_marginBottom="8dp" />
-
-    <TextView
-        android:id="@+id/overlaySessionLimit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="#AAAAAA"
-        android:textAlignment="center"
-        android:visibility="gone"
-        android:layout_marginBottom="4dp" />
-
-    <TextView
-        android:id="@+id/overlayTotalToday"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="#AAAAAA"
-        android:textAlignment="center"
-        android:visibility="gone"
-        android:layout_marginBottom="4dp" />
-
-    <TextView
-        android:id="@+id/overlayContinueCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="#FFCA28"
-        android:textAlignment="center"
-        android:visibility="gone"
-        android:layout_marginBottom="16dp" />
-
-    <TextView
-        android:id="@+id/overlayTimer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="00:00"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:visibility="gone"
-        android:layout_marginBottom="32dp" />
-
-    <Button
-        android:id="@+id/btnCloseOverlay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/overlay_close_app_btn"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF" />
-
-    <Button
-        android:id="@+id/btnSecondary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/overlay_btn"
-        android:backgroundTint="#00000000"
-        android:textColor="#DDDDDD"
-        android:visibility="gone"
-        android:layout_marginTop="8dp"/>
+    android:focusable="true"
+    android:padding="24dp">
 
     <LinearLayout
-        android:id="@+id/confirmEndLayout"
-        android:layout_width="wrap_content"
+        android:id="@+id/cardContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:layout_marginTop="16dp">
+        android:layout_gravity="center"
+        android:maxWidth="400dp"
+        android:background="@drawable/bg_warning_card"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
-        <Button
-            android:id="@+id/btnCancelEnd"
+        <!-- 1. Header horizontal: Ikon Aplikasi (32dp x 32dp) + Nama Aplikasi -->
+        <LinearLayout
+            android:id="@+id/overlayHeaderLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Batal"
-            android:backgroundTint="#757575"
-            android:textColor="#FFFFFF"
-            android:layout_marginEnd="16dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
 
-        <Button
-            android:id="@+id/btnConfirmEnd"
+            <ImageView
+                android:id="@+id/overlayAppIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="10dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/overlayAppName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1C1917" />
+        </LinearLayout>
+
+        <!-- 2. Container Tampilan Fokus (focusContainer) -->
+        <LinearLayout
+            android:id="@+id/focusContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/overlayFocusPhase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/overlay_phase_focus"
+                android:textColor="#0891B2"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/overlayFocusCycle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Siklus 1 dari 4"
+                android:textColor="#737373"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <FrameLayout
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dp">
+
+                <ProgressBar
+                    android:id="@+id/focusCircularProgress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="100"
+                    android:progressDrawable="@drawable/progress_bar_circular" />
+
+                <TextView
+                    android:id="@+id/overlayTimer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="00:00"
+                    android:textColor="#1C1917"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Standard Blocker Elements -->
+        <TextView
+            android:id="@+id/overlayTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ya, Akhiri"
-            android:backgroundTint="#D32F2F"
-            android:textColor="#FFFFFF" />
+            android:text="@string/overlay_title_time_up"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1C1917"
+            android:textAlignment="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/overlayMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/overlay_message"
+            android:textSize="14sp"
+            android:textColor="#525252"
+            android:textAlignment="center"
+            android:layout_marginBottom="16dp" />
+
+        <ProgressBar
+            android:id="@+id/overlayProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:progressDrawable="@drawable/progress_bar_horizontal"
+            android:max="100"
+            android:progress="100"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/overlaySessionLimit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="#737373"
+            android:textAlignment="center"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/overlayTimeSpent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#262626"
+            android:textAlignment="center"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/overlayTotalToday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#262626"
+            android:textAlignment="center"
+            android:layout_marginBottom="20dp" />
+
+        <!-- 3. Tombol Utama Sand (btnCloseOverlay): "Tutup [Nama Aplikasi]" -->
+        <Button
+            android:id="@+id/btnCloseOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:background="@drawable/bg_button_sand"
+            app:backgroundTint="@null"
+            android:textColor="#1C1917"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:text="@string/overlay_button_close"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 4. Container Tombol Tahan 3 Detik (holdToEndContainer) -->
+        <FrameLayout
+            android:id="@+id/holdToEndContainer"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_button_secondary"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <ProgressBar
+                android:id="@+id/holdProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/progress_bar_hold" />
+
+            <TextView
+                android:id="@+id/holdToEndText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/overlay_hold_to_end"
+                android:textColor="#1C1917"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btnSecondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:background="@drawable/bg_button_secondary"
+            app:backgroundTint="@null"
+            android:textColor="#1C1917"
+            android:textSize="14sp"
+            android:text="@string/overlay_button_extend"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/overlayContinueCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="#737373"
+            android:textAlignment="center"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/btnStartFocus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/overlay_start_focus_link"
+            android:textColor="#0891B2"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:textAlignment="center" />
+
+        <LinearLayout
+            android:id="@+id/confirmEndLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnCancelEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Batal"
+                android:backgroundTint="#757575"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="16dp"/>
+
+            <Button
+                android:id="@+id/btnConfirmEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ya, Akhiri"
+                android:backgroundTint="#D32F2F"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Anti DumbScroll</string>
+    <string name="accessibility_service_description">Эта служба отслеживает активные приложения, чтобы блокировать использование социальных сетей после истечения заданного времени.</string>
+    <string name="overlay_title">Время вышло!</string>
+    <string name="overlay_message">Вы слишком долго листали ленту. Пора сосредоточиться на чем-то другом!</string>
+    <string name="overlay_btn">Дайте мне 30 секунд</string>
+    <string name="focus_overlay_title">Режим фокуса активен</string>
+    <string name="focus_overlay_message">Давайте вернемся к работе!</string>
+
+    <string name="empty_monitored_apps_desc">Пока нет отслеживаемых приложений. Добавьте приложение, чтобы начать.</string>
+    <string name="add_app_btn">Добавить приложение</string>
+    <string name="overlay_time_spent">Вы провели %1$s в %2$s</string>
+    <string name="overlay_session_limit">Лимит сессии: %1$d минут</string>
+    <string name="overlay_total_today">Всего за сегодня: %1$s</string>
+    <string name="overlay_continue_count">Вы решили продолжить %1$d раз(а) сегодня</string>
+    <string name="overlay_close_app_btn">Закрыть %1$s</string>
+    <string name="app_picker_title">Выберите приложение</string>
+    <string name="search_app_hint">Поиск приложений&#8230;</string>
+    <string name="reset_data_btn">Сбросить данные</string>
+    <string name="nav_dashboard">Панель</string>
+    <string name="nav_focus">Фокус</string>
+    <string name="start_focus">Начать фокус</string>
+    <string name="focus_summary">%1$d мин фокус · %2$d мин отдых</string>
+    <string name="change_in_settings">Изменить в настройках</string>
+    <string name="accessibility_required">Для блокировки требуется активная служба</string>
+    <string name="enable_service">Включить службу</string>
+    <string name="no_monitored_apps_focus">Пока нет отслеживаемых приложений. Таймер ничего не заблокирует.</string>
+    <string name="add_apps">Добавить приложения</string>
+    <string name="continue_anyway">Все равно начать</string>
+
+    <string name="support_message_1">Небольшой перерыв полезен для ума.</string>
+    <string name="support_message_2">Вы сделали все возможное сегодня. Время выдохнуть.</string>
+    <string name="support_message_3">Экраны могут подождать, а ваши ценные моменты в реальности — нет.</string>
+    <string name="support_message_4">Спокойный ум приходит от достаточных пауз.</string>
+    <string name="support_message_5">Один маленький шаг от экрана, один огромный скачок для вашей концентрации.</string>
+    <string name="support_message_6">Возьмите контроль над своим днем, не позволяйте алгоритму контролировать вас.</string>
+
+    <string name="overlay_title_time_up">Время вышло</string>
+    <string name="overlay_session_progress">Прогресс сессии: %1$d из %2$d мин</string>
+    <string name="overlay_button_close">Закрыть %1$s</string>
+    <string name="overlay_button_extend">Дайте мне 30 секунд</string>
+    <string name="overlay_wait_seconds">Подождите %1$d секунд&#8230;</string>
+    <string name="overlay_remaining_chances">Осталось шансов продолжить сегодня: %1$d</string>
+    <string name="overlay_chances_exhausted">Шансы продолжить на сегодня исчерпаны</string>
+    <string name="overlay_start_focus_link">Начать фокус (25 мин)</string>
+
+    <string name="overlay_focus_title">Фокус в процессе</string>
+    <string name="overlay_phase_focus">Фокус</string>
+    <string name="overlay_phase_rest">Отдых</string>
+    <string name="overlay_cycle_format">Цикл %1$d из %2$d</string>
+    <string name="overlay_hold_to_end">Удерживайте 3 секунды, чтобы завершить</string>
+    <string name="overlay_holding">Удержание... %1$d%%</string>
+
+    <string name="about_title">О приложении и поддержка</string>
+    <string name="about_app_name">Anti DumbScroll</string>
+    <string name="about_copyright">© 2026 Hekalabs Studio</string>
+    <string name="about_license">Лицензировано под GNU General Public License v3.0 (GPL-3.0)</string>
+    <string name="about_privacy_statement">Ваша конфиденциальность в безопасности. Ваши данные (время, настройки) хранятся только на этом устройстве. Служба специальных возможностей считывает только название активного приложения для расчета времени, а не содержимое экрана, сообщения или пароли. Никакие данные не отправляются на сервер.</string>
+    <string name="about_source_code">Исходный код (GitHub)</string>
+    <string name="about_contact">Свяжитесь с нами</string>
+    <string name="about_privacy_policy">Полная политика конфиденциальности</string>
+    <string name="about_credits_title">Кредиты и атрибуция</string>
+    <string name="about_credits_gemini_logo">Логотип создан с помощью Gemini (Google)</string>
+    <string name="about_credits_gemini_dev">Разработано с помощью Gemini в Android Studio</string>
+    <string name="about_credits_libraries">Сторонние библиотеки:\n- Jetpack Compose (UI и Material 3)\n- Jetpack Navigation\n- Kotlin Coroutines\nВсе библиотеки выше лицензированы под Apache License 2.0.</string>
+    <string name="about_donate_button">Поддержать разработку</string>
+    <string name="about_donate_desc">Если это приложение помогло вам, вы можете поддержать его разработку. Это необязательно.</string>
+    <string name="error_no_browser">Нет установленного веб-браузера для открытия ссылок.</string>
+    <string name="language_setting">Язык</string>
+
+    <string name="setting_schedule_title">Automatic Blocking Schedule</string>
+    <string name="setting_schedule_desc">Automatically block apps during sleep/work hours</string>
+    <string name="setting_start_time">Start Time</string>
+    <string name="setting_end_time">End Time</string>
+    <string name="overlay_scheduled_block">Outside access hours!</string>
+    <string name="overlay_scheduled_desc">This app is automatically blocked because you are currently within the Automatic Schedule range.</string>
+</resources>

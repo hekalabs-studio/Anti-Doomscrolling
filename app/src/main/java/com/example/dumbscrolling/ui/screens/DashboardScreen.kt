@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +37,7 @@ import com.example.dumbscrolling.R
 
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel(),
+    viewModel: DashboardViewModel = hiltViewModel(),
     focusModeViewModel: FocusModeViewModel,
     onNavigateToSettings: () -> Unit = {}
 ) {
@@ -266,6 +266,13 @@ fun DashboardScreen(
                     }
                 }
             }
+            
+            item {
+                WeeklyStatsCard(
+                    weeklyStats = uiState.weeklyStats,
+                    dayLabels = uiState.weeklyDayLabels
+                )
+            }
 
             item {
                 TotalUsageCard(totalTimeMs = uiState.totalScreenTimeMs)
@@ -375,7 +382,15 @@ fun AppUsageItem(appUsage: AppUsage) {
         String.format(java.util.Locale.getDefault(), "%ds", seconds)
     }
 
-    val appName = appUsage.packageName.split(".").last().replaceFirstChar { it.uppercase() }
+    val context = LocalContext.current
+    val appName = remember(appUsage.packageName) {
+        try {
+            val appInfo = context.packageManager.getApplicationInfo(appUsage.packageName, 0)
+            context.packageManager.getApplicationLabel(appInfo).toString()
+        } catch (_: Exception) {
+            appUsage.packageName.split(".").last().replaceFirstChar { it.uppercase() }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -483,6 +498,118 @@ fun AchievementItem(achievement: Achievement) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = contentColor
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun WeeklyStatsCard(weeklyStats: List<Float>, dayLabels: List<String>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Statistik 7 Hari Terakhir",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val maxVal = weeklyStats.maxOrNull()?.coerceAtLeast(30f) ?: 30f
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                val count = maxOf(weeklyStats.size, dayLabels.size, 7)
+                for (index in 0 until count) {
+                    val value = weeklyStats.getOrElse(index) { 0f }
+                    val label = dayLabels.getOrElse(index) { "" }
+
+                    val durationText = if (value > 0f) {
+                        val mins = value.toInt()
+                        val h = mins / 60
+                        val m = mins % 60
+                        if (h > 0) {
+                            if (m > 0) "${h}h ${m}m" else "${h}h"
+                        } else {
+                            "${m}m"
+                        }
+                    } else {
+                        ""
+                    }
+
+                    val isToday = (index == count - 1)
+                    val activeBarColor = if (isToday) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // Teks Durasi Atas
+                        Box(
+                            modifier = Modifier.height(20.dp),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            if (durationText.isNotEmpty()) {
+                                Text(
+                                    text = durationText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Tampilan Batang (Chart Bar)
+                        Box(
+                            modifier = Modifier
+                                .width(18.dp)
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(androidx.compose.ui.graphics.Color(0x20000000)),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            val barHeightFraction = (value / maxVal).coerceIn(0f, 1f)
+                            if (barHeightFraction > 0f) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(barHeightFraction)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(activeBarColor)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Label Nama Hari Bawah
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         }
     }

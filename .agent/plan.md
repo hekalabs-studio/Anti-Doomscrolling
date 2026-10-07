@@ -117,12 +117,18 @@ APLIKASI PENDETEKSI DUMB SCROLLING, mengurangi penggunaan social media dan mempe
   - Focus overlay lacks +30s option
 - **Duration:** 3m 56s
 
-### Task_11_ForegroundServiceAndVerify: Implement Foreground Service (specialUse) with POST_NOTIFICATIONS for persistent monitoring and Pomodoro chronometer. Run and verify application stability (no crashes), confirm alignment with user requirements, and report critical UI issues.
+### Task_15_HiltAndRoomMigration: Set up Dagger-Hilt for Dependency Injection (ViewModels, Services). Migrate local data storage from SharedPreferences to Room Database for more structured data management.
 - **Status:** IN_PROGRESS
 - **Acceptance Criteria:**
-  - POST_NOTIFICATIONS requested and Foreground Service runs with chronometer
+  - Hilt is configured for DI across the app
+  - Room Database replaces SharedPreferences for main data storage
+- **StartTime:** 2026-10-07 09:21:08 WIB
+
+### Task_16_BootReceiverAndVerify: Implement BOOT_COMPLETED receiver to auto-restart the app tracking service on device reboot. Run and verify application stability after under-the-hood optimizations.
+- **Status:** PENDING
+- **Acceptance Criteria:**
+  - BOOT_COMPLETED receiver successfully starts the background service
   - make sure all existing tests pass
   - build pass
   - app does not crash
-- **StartTime:** 2026-10-05 18:28:53 WIB
 

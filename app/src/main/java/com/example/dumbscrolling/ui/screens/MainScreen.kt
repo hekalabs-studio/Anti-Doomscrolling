@@ -15,8 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import com.example.dumbscrolling.R
 
@@ -25,15 +24,7 @@ import com.example.dumbscrolling.R
 fun MainScreen(
     onNavigateToSettings: () -> Unit
 ) {
-    val context = LocalContext.current
-    val application = context.applicationContext as Application
-    val focusModeViewModel: FocusModeViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return FocusModeViewModel(application) as T
-            }
-        }
-    )
+    val focusModeViewModel: FocusModeViewModel = hiltViewModel()
 
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Anti DumbScroll</string>
+    <string name="accessibility_service_description">此服务监控活动应用，以在设定的时间限制后阻止社交媒体的使用。</string>
+    <string name="overlay_title">时间到了！</string>
+    <string name="overlay_message">您滚动的时间太长了。是时候专注于其他事情了！</string>
+    <string name="overlay_btn">给我 30 秒</string>
+    <string name="focus_overlay_title">专注模式已激活</string>
+    <string name="focus_overlay_message">让我们继续工作吧！</string>
+
+    <string name="empty_monitored_apps_desc">尚未监控任何应用。添加应用以开始。</string>
+    <string name="add_app_btn">添加应用</string>
+    <string name="overlay_time_spent">您在 %2$s 上花费了 %1$s</string>
+    <string name="overlay_session_limit">会话限制：%1$d 分钟</string>
+    <string name="overlay_total_today">今日总计：%1$s</string>
+    <string name="overlay_continue_count">您今天已选择继续 %1$d 次</string>
+    <string name="overlay_close_app_btn">关闭 %1$s</string>
+    <string name="app_picker_title">选择应用</string>
+    <string name="search_app_hint">搜索应用&#8230;</string>
+    <string name="reset_data_btn">重置数据</string>
+    <string name="nav_dashboard">仪表板</string>
+    <string name="nav_focus">专注</string>
+    <string name="start_focus">开始专注</string>
+    <string name="focus_summary">%1$d 分钟专注 · %2$d 分钟休息</string>
+    <string name="change_in_settings">在设置中更改</string>
+    <string name="accessibility_required">拦截需要启用服务</string>
+    <string name="enable_service">启用服务</string>
+    <string name="no_monitored_apps_focus">尚未监控任何应用。计时器不会拦截任何内容。</string>
+    <string name="add_apps">添加应用</string>
+    <string name="continue_anyway">仍然开始</string>
+
+    <string name="support_message_1">稍作休息对您的大脑有好处。</string>
+    <string name="support_message_2">您今天已经尽力了。深呼吸。</string>
+    <string name="support_message_3">屏幕可以等待，您在现实中的珍贵时刻则不能。</string>
+    <string name="support_message_4">平静的头脑来自于充足的停顿。</string>
+    <string name="support_message_5">远离屏幕的一小步，是您专注力的一大步。</string>
+    <string name="support_message_6">掌控您的一天，不要让算法控制您。</string>
+
+    <string name="overlay_title_time_up">时间到了</string>
+    <string name="overlay_session_progress">会话进度：%1$d / %2$d 分钟</string>
+    <string name="overlay_button_close">关闭 %1$s</string>
+    <string name="overlay_button_extend">给我 30 秒</string>
+    <string name="overlay_wait_seconds">请等待 %1$d 秒&#8230;</string>
+    <string name="overlay_remaining_chances">今日剩余继续次数：%1$d</string>
+    <string name="overlay_chances_exhausted">今日继续机会已用完</string>
+    <string name="overlay_start_focus_link">开始 25 分钟专注</string>
+
+    <string name="overlay_focus_title">正在专注</string>
+    <string name="overlay_phase_focus">专注</string>
+    <string name="overlay_phase_rest">休息</string>
+    <string name="overlay_cycle_format">第 %1$d 个循环，共 %2$d 个</string>
+    <string name="overlay_hold_to_end">按住 3 秒以结束</string>
+    <string name="overlay_holding">正在按住... %1$d%%</string>
+
+    <string name="about_title">关于与支持</string>
+    <string name="about_app_name">Anti DumbScroll</string>
+    <string name="about_copyright">© 2026 Hekalabs Studio</string>
+    <string name="about_license">根据 GNU General Public License v3.0 (GPL-3.0) 授权</string>
+    <string name="about_privacy_statement">您的隐私很安全。您的数据（时间、设置）仅保存在此设备上。无障碍服务仅读取正在活动的应用程序名称来计算时间，而不读取屏幕内容、消息或密码。没有数据被发送到服务器。</string>
+    <string name="about_source_code">源代码 (GitHub)</string>
+    <string name="about_contact">联系我们</string>
+    <string name="about_privacy_policy">完整隐私政策</string>
+    <string name="about_credits_title">鸣谢与归属</string>
+    <string name="about_credits_gemini_logo">标志由 Gemini (Google) 协助创建</string>
+    <string name="about_credits_gemini_dev">在 Android Studio 中由 Gemini 协助开发</string>
+    <string name="about_credits_libraries">第三方库：\n- Jetpack Compose (UI &amp; Material 3)\n- Jetpack Navigation\n- Kotlin Coroutines\n以上所有库均根据 Apache License 2.0 授权。</string>
+    <string name="about_donate_button">支持开发</string>
+    <string name="about_donate_desc">如果此应用程序对您有帮助，您可以考虑支持其开发。这是自愿的。</string>
+    <string name="error_no_browser">未安装任何网页浏览器以打开链接。</string>
+    <string name="language_setting">语言</string>
+
+    <string name="setting_schedule_title">Automatic Blocking Schedule</string>
+    <string name="setting_schedule_desc">Automatically block apps during sleep/work hours</string>
+    <string name="setting_start_time">Start Time</string>
+    <string name="setting_end_time">End Time</string>
+    <string name="overlay_scheduled_block">Outside access hours!</string>
+    <string name="overlay_scheduled_desc">This app is automatically blocked because you are currently within the Automatic Schedule range.</string>
+</resources>

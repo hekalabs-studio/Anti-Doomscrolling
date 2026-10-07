@@ -1,30 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Anti DumbScroll</string>
-    <string name="accessibility_service_description">Layanan ini memantau aplikasi aktif untuk memblokir penggunaan media sosial setelah batas waktu yang ditentukan.</string>
-    <string name="overlay_title">Waktu Habis!</string>
-    <string name="overlay_message">Kamu sudah terlalu lama scrolling. Waktunya fokus ke hal lain!</string>
-    <string name="overlay_btn">Beri saya 30 detik</string>
-    <string name="focus_overlay_title">Mode Fokus Aktif</string>
-    <string name="focus_overlay_message">Ayo kembali bekerja!</string>
+    <string name="accessibility_service_description">This service monitors active apps to block social media usage after a set time limit.</string>
+    <string name="overlay_title">Time\'s Up!</string>
+    <string name="overlay_message">You\'ve been scrolling for too long. Time to focus on something else!</string>
+    <string name="overlay_btn">Give me 30 seconds</string>
+    <string name="focus_overlay_title">Focus Mode Active</string>
+    <string name="focus_overlay_message">Let\'s get back to work!</string>
 
-    <string name="empty_monitored_apps_desc">Belum ada aplikasi dipantau. Tambahkan aplikasi untuk mulai.</string>
-    <string name="add_app_btn">Tambahkan aplikasi</string>
-    <string name="overlay_time_spent">Kamu sudah %1$d menit %2$d detik di %3$s</string>
-    <string name="overlay_session_limit">Batas sesi: %1$d menit</string>
-    <string name="overlay_total_today">Total hari ini: %1$d menit</string>
-    <string name="overlay_continue_count">Kamu sudah memilih lanjut %1$d kali hari ini</string>
-    <string name="overlay_close_app_btn">Tutup %1$s</string>
-    <string name="app_picker_title">Pilih Aplikasi</string>
-    <string name="search_app_hint">Cari aplikasi&#8230;</string>
+    <string name="empty_monitored_apps_desc">No apps monitored yet. Add an app to start.</string>
+    <string name="add_app_btn">Add app</string>
+    <string name="overlay_time_spent">You\'ve spent %1$s on %2$s</string>
+    <string name="overlay_session_limit">Session limit: %1$d minutes</string>
+    <string name="overlay_total_today">Total today: %1$s</string>
+    <string name="overlay_continue_count">You\'ve chosen to continue %1$d times today</string>
+    <string name="overlay_close_app_btn">Close %1$s</string>
+    <string name="app_picker_title">Select App</string>
+    <string name="search_app_hint">Search apps&#8230;</string>
     <string name="reset_data_btn">Reset Data</string>
     <string name="nav_dashboard">Dashboard</string>
-    <string name="nav_focus">Fokus</string>
-    <string name="start_focus">Mulai Fokus</string>
-    <string name="focus_summary">%1$d menit fokus · %2$d menit istirahat</string>
-    <string name="change_in_settings">Ubah di Pengaturan</string>
-    <string name="accessibility_required">Pemblokiran butuh layanan aktif</string>
-    <string name="enable_service">Aktifkan Layanan</string>
-    <string name="no_monitored_apps_focus">Belum ada aplikasi yang dipantau. Timer tidak akan memblokir apa pun.</string>
-    <string name="add_apps">Tambahkan Aplikasi</string>
-    <string name="continue_anyway">Tetap Mulai</string>
+    <string name="nav_focus">Focus</string>
+    <string name="start_focus">Start Focus</string>
+    <string name="focus_summary">%1$d min focus · %2$d min rest</string>
+    <string name="change_in_settings">Change in Settings</string>
+    <string name="accessibility_required">Blocking requires active service</string>
+    <string name="enable_service">Enable Service</string>
+    <string name="no_monitored_apps_focus">No monitored apps yet. Timer won\'t block anything.</string>
+    <string name="add_apps">Add Apps</string>
+    <string name="continue_anyway">Start Anyway</string>
+
+    <string name="support_message_1">Taking a break is good for your mind.</string>
+    <string name="support_message_2">You\'ve done your best today. Time to breathe.</string>
+    <string name="support_message_3">Screens can wait, your precious moments in reality cannot.</string>
+    <string name="support_message_4">A calm mind comes from sufficient pauses.</string>
+    <string name="support_message_5">One small step away from the screen, one giant leap for your focus.</string>
+    <string name="support_message_6">Take control of your day, don\'t let the algorithm control you.</string>
+
+    <string name="overlay_title_time_up">Time\'s Up</string>
+    <string name="overlay_session_progress">Session progress: %1$d of %2$d mins</string>
+    <string name="overlay_button_close">Close %1$s</string>
+    <string name="overlay_button_extend">Give me 30 seconds</string>
+    <string name="overlay_wait_seconds">Wait %1$d seconds&#8230;</string>
+    <string name="overlay_remaining_chances">Remaining continue chances today: %1$d</string>
+    <string name="overlay_chances_exhausted">Continue chances for today are exhausted</string>
+    <string name="overlay_start_focus_link">Start 25 min Focus</string>
+
+    <string name="overlay_focus_title">Focus in Progress</string>
+    <string name="overlay_phase_focus">Focus</string>
+    <string name="overlay_phase_rest">Rest</string>
+    <string name="overlay_cycle_format">Cycle %1$d of %2$d</string>
+    <string name="overlay_hold_to_end">Hold 3 seconds to end session</string>
+    <string name="overlay_holding">Holding... %1$d%%</string>
+
+    <string name="about_title">About &amp; Support</string>
+    <string name="about_app_name">Anti DumbScroll</string>
+    <string name="about_copyright">© 2026 Hekalabs Studio</string>
+    <string name="about_license">Licensed under GNU General Public License v3.0 (GPL-3.0)</string>
+    <string name="about_privacy_statement">Your privacy is safe. Your data (time, settings) is only stored on this device. The Accessibility Service only reads the name of the active app to calculate time, not screen contents, messages, or passwords. No data is sent to the server.</string>
+    <string name="about_source_code">Source Code (GitHub)</string>
+    <string name="about_contact">Contact Us</string>
+    <string name="about_privacy_policy">Full Privacy Policy</string>
+    <string name="about_credits_title">Credits &amp; Attribution</string>
+    <string name="about_credits_gemini_logo">Logo created with the help of Gemini (Google)</string>
+    <string name="about_credits_gemini_dev">Developed with the help of Gemini in Android Studio</string>
+    <string name="about_credits_libraries">Third-Party Libraries:\n- Jetpack Compose (UI &amp; Material 3)\n- Jetpack Navigation\n- Kotlin Coroutines\nAll libraries above are licensed under Apache License 2.0.</string>
+    <string name="about_donate_button">Support Development</string>
+    <string name="about_donate_desc">If this app helped you, consider supporting its development. It is optional.</string>
+    <string name="error_no_browser">No web browser installed to open links.</string>
+    <string name="language_setting">Language</string>
+
+    <string name="setting_schedule_title">Automatic Blocking Schedule</string>
+    <string name="setting_schedule_desc">Automatically block apps during sleep/work hours</string>
+    <string name="setting_start_time">Start Time</string>
+    <string name="setting_end_time">End Time</string>
+    <string name="overlay_scheduled_block">Outside access hours!</string>
+    <string name="overlay_scheduled_desc">This app is automatically blocked because you are currently within the Automatic Schedule range.</string>
 </resources>

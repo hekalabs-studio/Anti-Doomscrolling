@@ -8,20 +8,26 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dumbscrolling.services.PomodoroService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Named
 
 enum class PomodoroPhase {
     IDLE, FOKUS, ISTIRAHAT_PENDEK, ISTIRAHAT_PANJANG
 }
 
-class FocusModeViewModel(application: Application) : AndroidViewModel(application) {
-    private val prefs = application.getSharedPreferences("FocusModePrefs", Context.MODE_PRIVATE)
-    private val settingsPrefs = application.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+@HiltViewModel
+class FocusModeViewModel @Inject constructor(
+    application: Application,
+    @Named("FocusPrefs") private val prefs: SharedPreferences,
+    @Named("SettingsPrefs") private val settingsPrefs: SharedPreferences
+) : AndroidViewModel(application) {
 
     private val _remainingTimeMs = MutableStateFlow(0L)
     val remainingTimeMs: StateFlow<Long> = _remainingTimeMs.asStateFlow()
