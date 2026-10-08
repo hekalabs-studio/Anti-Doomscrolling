@@ -110,6 +110,9 @@ class PomodoroService : Service() {
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
+            ACTION_SKIP_PHASE -> {
+                completePhase()
+            }
             ACTION_PHASE_CHANGED -> {
                 playPhaseChangeFeedback()
                 val currentPhase = prefs.getString("current_phase", "IDLE") ?: "IDLE"
@@ -178,6 +181,7 @@ class PomodoroService : Service() {
                     val rem = targetTimeMs - current
                     if (rem <= 0) {
                         FocusWidgetProvider.updateWidget(this@PomodoroService, "Siap", "--:--")
+                        completePhase()
                         break
                     }
                     FocusWidgetProvider.updateWidget(this@PomodoroService, phase, formatTime(rem))
@@ -192,6 +196,61 @@ class PomodoroService : Service() {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    private fun completePhase() {
+        val currentPhase = prefs.getString("current_phase", "IDLE") ?: "IDLE"
+        var completedSessions = prefs.getInt("completed_sessions_today", 0)
+        if (currentPhase == "FOKUS") {
+            completedSessions++
+        }
+        
+        val settingsPrefs = getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+        val totalCycles = settingsPrefs.getInt("long_break_cycle", 4)
+        var currentCycle = prefs.getInt("current_cycle", 1)
+        
+        val nextPhase = when (currentPhase) {
+            "FOKUS" -> if (currentCycle >= totalCycles) "ISTIRAHAT_PANJANG" else "ISTIRAHAT_PENDEK"
+            "ISTIRAHAT_PENDEK" -> { currentCycle++; "FOKUS" }
+            "ISTIRAHAT_PANJANG" -> { currentCycle = 1; "FOKUS" }
+            else -> "FOKUS"
+        }
+        
+        if (nextPhase == "IDLE") {
+            prefs.edit().putString("current_phase", "IDLE").putLong("focus_target_time_ms", 0L).putBoolean("is_paused", false).apply()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return
+        }
+        
+        val autoStart = settingsPrefs.getBoolean("auto_start_next_phase", false)
+        val durationMs = getPhaseDurationMs(nextPhase, settingsPrefs)
+        val targetTime = if (autoStart) System.currentTimeMillis() + durationMs else 0L
+        val isPaused = !autoStart
+        
+        prefs.edit()
+            .putString("current_phase", nextPhase)
+            .putBoolean("is_paused", isPaused)
+            .putLong("focus_target_time_ms", targetTime)
+            .putLong("remaining_time_when_paused", durationMs)
+            .putLong("remaining_pause_ms", durationMs)
+            .putInt("current_cycle", currentCycle)
+            .putInt("completed_sessions_today", completedSessions)
+            .apply()
+            
+        playPhaseChangeFeedback()
+        val isFocus = nextPhase == "FOKUS"
+        startOrUpdateForeground(targetTime, isFocus, isPaused, durationMs)
+    }
+
+    private fun getPhaseDurationMs(phase: String, settingsPrefs: SharedPreferences): Long {
+        val minutes = when (phase) {
+            "FOKUS" -> settingsPrefs.getInt("focus_duration", 25)
+            "ISTIRAHAT_PENDEK" -> settingsPrefs.getInt("short_break_duration", 5)
+            "ISTIRAHAT_PANJANG" -> settingsPrefs.getInt("long_break_duration", 15)
+            else -> 25
+        }
+        return minutes * 60 * 1000L
     }
 
     private fun createNotification(
@@ -306,6 +365,7 @@ class PomodoroService : Service() {
         const val ACTION_RESUME = "com.example.dumbscrolling.ACTION_POMODORO_RESUME"
         const val ACTION_END = "com.example.dumbscrolling.ACTION_POMODORO_END"
         const val ACTION_PHASE_CHANGED = "com.example.dumbscrolling.ACTION_POMODORO_PHASE_CHANGED"
+        const val ACTION_SKIP_PHASE = "com.example.dumbscrolling.ACTION_POMODORO_SKIP_PHASE"
 
         const val EXTRA_TARGET_TIME_MS = "extra_target_time_ms"
         const val EXTRA_IS_FOCUS_PHASE = "extra_is_focus_phase"

@@ -103,6 +103,13 @@ fun SettingsScreen(
                     else -> "English"
                 }
 
+                fun changeLanguage(languageTag: String) {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
+                    if (context is android.app.Activity) {
+                        context.recreate()
+                    }
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -124,28 +131,28 @@ fun SettingsScreen(
                                 text = { Text("English") },
                                 onClick = {
                                     showLanguageMenu = false
-                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+                                    changeLanguage("en")
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("Bahasa Indonesia") },
                                 onClick = {
                                     showLanguageMenu = false
-                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("id"))
+                                    changeLanguage("id")
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("Русский") },
                                 onClick = {
                                     showLanguageMenu = false
-                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
+                                    changeLanguage("ru")
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("中文") },
                                 onClick = {
                                     showLanguageMenu = false
-                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("zh"))
+                                    changeLanguage("zh")
                                 }
                             )
                         }

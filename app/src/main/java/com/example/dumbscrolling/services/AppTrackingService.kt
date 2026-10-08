@@ -17,6 +17,8 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import android.widget.TextView
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 import com.example.dumbscrolling.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +31,7 @@ class AppTrackingService : AccessibilityService() {
     private var activePackageName: String? = null
     private var overlayView: View? = null
     private lateinit var windowManager: WindowManager
+    private var isScreenOn = true
 
     // Limits
     private var timeLimitMs = 15 * 60 * 1000L // default 15 mins
@@ -56,11 +59,32 @@ class AppTrackingService : AccessibilityService() {
     private lateinit var settingsPrefs: SharedPreferences
     private val sessionClosedFlags = mutableSetOf<String>()
 
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    isScreenOn = false
+                    removeOverlay()
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    isScreenOn = true
+                    checkDailyReset()
+                }
+            }
+        }
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         prefs = getSharedPreferences("FocusModePrefs", MODE_PRIVATE)
         settingsPrefs = getSharedPreferences("SettingsPrefs", MODE_PRIVATE)
+        
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+        registerReceiver(screenStateReceiver, filter)
         
         checkDailyReset()
         loadSettings()
@@ -185,6 +209,10 @@ class AppTrackingService : AccessibilityService() {
             trackingJob = scope.launch {
                 var warned80Percent = false
                 while (isActive) {
+                    if (!isScreenOn) {
+                        delay(1000)
+                        continue
+                    }
                     delay(1000)
                     checkDailyReset()
                     val currentUsage = usageStats.getOrDefault(packageName, 0L) + 1000L
@@ -362,8 +390,9 @@ class AppTrackingService : AccessibilityService() {
             // ignore
         }
         
+        val timeString = "${usageMinutes}m ${usageSeconds}s"
         titleText?.text = getString(R.string.overlay_title)
-        messageText?.text = getString(R.string.overlay_time_spent, usageMinutes, usageSeconds, appName)
+        messageText?.text = getString(R.string.overlay_time_spent, timeString, appName)
         
         limitText?.text = getString(R.string.overlay_session_limit, limitMinutes)
         limitText?.visibility = View.VISIBLE
@@ -407,6 +436,25 @@ class AppTrackingService : AccessibilityService() {
         }
         
         btnSecondary?.visibility = View.VISIBLE
+        btnSecondary?.isEnabled = false
+        val originalText = getString(R.string.overlay_button_extend)
+        var waitTimeSec = 5 + (continueCount * 5)
+        btnSecondary?.text = getString(R.string.overlay_wait_seconds, waitTimeSec)
+
+        scope.launch {
+            while (waitTimeSec > 0) {
+                delay(1000)
+                waitTimeSec--
+                if (overlayView == null) break
+                if (waitTimeSec > 0) {
+                    btnSecondary?.text = getString(R.string.overlay_wait_seconds, waitTimeSec)
+                } else {
+                    btnSecondary?.text = originalText
+                    btnSecondary?.isEnabled = true
+                }
+            }
+        }
+
         btnSecondary?.setOnClickListener {
             prefs.edit().putInt("continue_count_$packageName", continueCount + 1).apply()
             removeOverlay()
@@ -428,6 +476,10 @@ class AppTrackingService : AccessibilityService() {
         
         trackingJob = scope.launch {
             while (remainingMs > 0 && isActive) {
+                if (!isScreenOn) {
+                    delay(1000)
+                    continue
+                }
                 if (remainingMs % 10000L == 0L) {
                     val appName = getAppName(packageName)
                     android.widget.Toast.makeText(applicationContext, "Sisa ${remainingMs / 1000} detik di $appName", android.widget.Toast.LENGTH_SHORT).show()
@@ -460,6 +512,11 @@ class AppTrackingService : AccessibilityService() {
     override fun onInterrupt() {}
     
     override fun onDestroy() {
+        try {
+            unregisterReceiver(screenStateReceiver)
+        } catch (e: Exception) {
+            Log.e("AppTrackingService", "Failed to unregister receiver", e)
+        }
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(102)
         trackingJob?.cancel()

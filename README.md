@@ -1,46 +1,57 @@
-# Anti DumbScroll
+# Anti DumbScroll 🚫📱
 
-Anti DumbScroll adalah aplikasi Android sumber terbuka (open source) yang dibuat untuk membantu Anda membatasi waktu layar (*screen time*) berlebihan di aplikasi media sosial, agar Anda bisa fokus pada hal yang lebih penting atau istirahat sejenak.
+> **Menghentikan scrolling tanpa henti dan mengembalikan fokus Anda.**
 
-## Fitur Utama
-- **Pemblokiran Waktu Nyata**: Menggunakan layanan aksesibilitas untuk mendeteksi kapan aplikasi media sosial aktif, dan mencegah Anda scrolling tanpa henti.
-- **Pomodoro Timer**: Membantu Anda belajar atau bekerja dalam mode fokus (contoh: 25 menit kerja, 5 menit istirahat).
-- **Notifikasi Persisten**: Mengingatkan Anda tentang durasi penggunaan.
-- **Overlay Layar Penuh**: Mengambil alih layar untuk memaksa Anda beristirahat saat batas waktu terlampaui.
+Anti DumbScroll adalah aplikasi Android yang dirancang untuk membantu Anda lepas dari jeratan *doomscrolling* atau *dumbscrolling* di media sosial dan aplikasi adiktif lainnya. Aplikasi ini memaksa Anda untuk berhenti sejenak, berpikir ulang, dan mengambil kembali kendali atas waktu Anda.
 
-## Cara Build
-Untuk mengompilasi dan menjalankan aplikasi ini:
-1. Pastikan Anda sudah menginstal **Android Studio** atau command-line tools Android (CLI).
-2. Kloning (*clone*) repositori ini (`https://github.com/hekalabs-studio/Anti-Doomscrolling`) ke komputer Anda.
-3. Buka terminal atau Android Studio, lalu jalankan:
-   ```bash
-   ./gradlew :app:assembleDebug
-   ```
-4. APK hasil *build* akan berada di folder `app/build/outputs/apk/debug/`.
+## ✨ Fitur Utama
+*   **Pemblokir Pintar (Smart Blocker):** Menerapkan eskalasi jeda 30 detik yang memaksa Anda berpikir dua kali sebelum membuka aplikasi adiktif.
+*   **Mode Pomodoro Tangguh:** Sesi fokus yang dijamin berjalan stabil di *background service* agar Anda tidak terdistraksi dan tetap produktif.
+*   **Analitik 7 Hari:** Pantau tren fokus dan kebiasaan digital Anda melalui visualisasi *Bar Chart* yang interaktif.
+*   **Jadwal Pemblokiran Otomatis:** Atur rutinitas harian untuk memblokir aplikasi pada jam-jam tertentu secara otomatis.
+*   **Widget Layar Beranda:** Akses cepat untuk memulai sesi Pomodoro atau melihat status pemblokiran langsung dari *Home Screen*.
+*   **Multi-bahasa:** Mendukung berbagai bahasa, termasuk Bahasa Indonesia (ID), English (EN), Русский (RU), dan 中文 (ZH).
+*   **Tema Dinamis (Material You):** Tampilan antarmuka modern yang secara dinamis menyesuaikan dengan warna *wallpaper* perangkat Anda.
 
-## Izin yang Diperlukan
-Aplikasi ini membutuhkan beberapa izin sistem Android agar berfungsi dengan baik:
-- **POST_NOTIFICATIONS**: Diperlukan untuk menampilkan timer, informasi penggunaan sesi, dan notifikasi bahwa pemantauan sedang aktif.
-- **ACCESSIBILITY (Layanan Aksesibilitas)**: Diperlukan untuk mendeteksi aplikasi apa yang sedang aktif di layar utama Anda (hanya mengambil nama aplikasi/*package name* untuk menghitung waktu layar). Aplikasi tidak merekam isi layar, tidak membaca pesan, dan tidak mencuri kata sandi.
-- **SYSTEM_ALERT_WINDOW (Tampil di Atas Aplikasi Lain / Overlay)**: Diperlukan untuk menampilkan pesan pemblokiran atau mode fokus (mengambil alih layar saat waktu habis) tanpa membuka aplikasi secara langsung.
+## 🔒 Komitmen Privasi (Privacy-First)
+**100% Offline & Aman.**
+Aplikasi ini memprioritaskan privasi Anda dan beroperasi sepenuhnya di dalam perangkat.
+*   **Tanpa Akses Internet:** Kami sama sekali tidak mendeklarasikan izin `INTERNET` di aplikasi ini. Data Anda tidak akan pernah keluar dari perangkat.
+*   **Hanya Membaca Package Name:** *Accessibility Service* secara eksklusif hanya digunakan untuk mendeteksi ID aplikasi (*package name*) yang sedang dibuka (untuk keperluan pemblokiran). Aplikasi tidak membaca isi layar, teks yang diketik, atau data pribadi lainnya.
 
-## Cara Instalasi APK & Panduan Izin
-Saat menginstal aplikasi di luar Google Play Store (sideload), Anda mungkin melihat peringatan **Play Protect** ("Unsafe app blocked" atau semacamnya).
-1. Pilih **"More details"** dan klik **"Install anyway"**.
-2. **Android 13+ "Restricted Settings"**: Pada Android 13 dan yang lebih baru, Android membatasi izin Layanan Aksesibilitas bagi APK yang diinstal dari luar toko resmi. Jika Anda mencoba mengaktifkan Layanan Aksesibilitas untuk Anti DumbScroll dan mendapatkan peringatan "Restricted Setting":
-   - Buka **Pengaturan** sistem Android.
-   - Pergi ke **Aplikasi** > cari **Anti DumbScroll**.
-   - Tekan ikon **tiga titik (Menu)** di sudut kanan atas info aplikasi, lalu pilih **"Allow restricted settings"** (Izinkan pengaturan terbatas). Konfirmasi identitas Anda (PIN/Sidik Jari).
-   - Setelah diizinkan, kembali ke setelan Aksesibilitas dan Anda sudah bisa mengaktifkan **Anti DumbScroll Service**.
-3. **Peringatan Aplikasi Bank**: Harap dicatat bahwa beberapa aplikasi perbankan modern mungkin mengenali Overlay (System Alert Window) dan Layanan Aksesibilitas dari Anti DumbScroll. Aplikasi perbankan tersebut mungkin meminta Anda mematikan overlay atau layanan aksesibilitas saat menggunakannya demi alasan keamanan, untuk mencegah aplikasi lain merekam layar Anda. Hal ini normal pada Android.
+## 🚀 Panduan Instalasi (Penting!)
 
-## Dukung Pengembangan
-Jika aplikasi ini membantu hidup Anda lebih fokus dan produktif, Anda dapat mendukung pengembangannya. Donasi sepenuhnya **opsional** dan tidak diwajibkan untuk menggunakan seluruh fitur aplikasi.
-[Dukung Pengembangan (Donasi)](https://hekalabs-donation.web.app)
+Karena Anti DumbScroll bekerja di tingkat sistem untuk mendeteksi dan memblokir aplikasi, Anda perlu memberikan beberapa izin sistem khusus agar aplikasi dapat berjalan optimal.
 
-## Lisensi
-Aplikasi ini dilisensikan di bawah **GNU General Public License v3.0 (GPL-3.0)**.
-Kode sumber dapat digunakan secara bebas, diubah, dan didistribusikan ulang sesuai syarat GPLv3. Seluruh karya turunan harus bersumber terbuka (open source) menggunakan lisensi yang sama.
+### 1. Instalasi APK
+Unduh file APK dari halaman *Releases* dan instal secara manual (sideload) di perangkat Android Anda.
 
-**Catatan Merek Dagang:**
-Nama dan logo "Anti DumbScroll" adalah hak milik Hekalabs Studio dan tidak untuk digunakan pada produk turunan/fork tanpa izin.
+### 2. Mengizinkan "Pengaturan Terbatas" di Android 13+ (Aksesibilitas)
+Pada Android 13 ke atas, Google membatasi izin Aksesibilitas untuk aplikasi yang diinstal di luar Play Store. Ikuti langkah ini untuk mengaktifkannya:
+1. Buka **Pengaturan (Settings)** > **Aplikasi (Apps)** > Cari dan pilih **Anti DumbScroll**.
+2. Ketuk ikon **tiga titik (⋮)** di pojok kanan atas.
+3. Pilih **Izinkan pengaturan terbatas (Allow restricted settings)**.
+4. Setelah itu, buka pengaturan Aksesibilitas di perangkat Anda, cari "Anti DumbScroll", dan aktifkan layanannya.
+
+### 3. Pengaturan Baterai (Unrestricted)
+Agar *Smart Blocker* dan *Pomodoro Background Service* tidak dimatikan secara paksa oleh sistem operasi (terutama pada perangkat OEM seperti Xiaomi, Samsung, Oppo, dan Vivo):
+1. Buka **Info Aplikasi (App Info)** untuk Anti DumbScroll.
+2. Masuk ke menu **Baterai (Battery)**.
+3. Ubah pengaturannya menjadi **Tidak Dibatasi (Unrestricted)**.
+
+> [!WARNING]  
+> **Catatan Terkait Aplikasi Perbankan:** Beberapa aplikasi bank mungkin menampilkan peringatan keamanan karena mendeteksi Anti DumbScroll menggunakan fitur *Accessibility Service*. Ini adalah peringatan standar dari aplikasi perbankan. Anda tidak perlu khawatir karena Anti DumbScroll 100% *offline* dan tidak memiliki kemampuan untuk mengirim data ke internet.
+
+## 🛠 Tech Stack
+Aplikasi ini dibangun menggunakan arsitektur dan teknologi Android modern:
+*   **Kotlin** - Bahasa pemrograman utama.
+*   **Jetpack Compose** - UI toolkit deklaratif untuk antarmuka pengguna.
+*   **Room DB** - Penyimpanan database relasional lokal.
+*   **Dagger-Hilt** - *Dependency Injection* untuk arsitektur yang bersih.
+*   **AccessibilityService** - Layanan inti (core system) untuk mendeteksi aktivitas aplikasi.
+
+## 📄 Lisensi & Hak Cipta
+Aplikasi ini didistribusikan di bawah lisensi **GPL-3.0**.
+
+**Hak Cipta © 2026 Hekalabs Studio.**
+Logo, desain merek, dan nama "Anti DumbScroll" adalah properti eksklusif milik Hekalabs Studio.
