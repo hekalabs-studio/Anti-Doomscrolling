@@ -342,7 +342,7 @@ class AppTrackingService : AccessibilityService() {
                 
                 val minutes = remainingMs / 60000
                 val seconds = (remainingMs % 60000) / 1000
-                timerText?.text = String.format("%02d:%02d", minutes, seconds)
+                timerText?.text = String.format(java.util.Locale.getDefault(), "%02d:%02d", minutes, seconds)
                 
                 delay(1000)
             }

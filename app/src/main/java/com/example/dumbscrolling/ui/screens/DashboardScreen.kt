@@ -44,6 +44,8 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val locale = configuration.locales[0]
     var isAccessibilityEnabled by remember { 
         mutableStateOf(isAccessibilityServiceEnabled(context)) 
     }
@@ -240,7 +242,7 @@ fun DashboardScreen(
                             val m = totalSeconds / 60
                             val s = totalSeconds % 60
                             Text(
-                                text = String.format("%02d:%02d", m, s),
+                                text = String.format(locale, "%02d:%02d", m, s),
                                 style = MaterialTheme.typography.displayMedium,
                                 fontWeight = FontWeight.Light
                             )
@@ -328,15 +330,17 @@ fun DashboardScreen(
 
 @Composable
 fun TotalUsageCard(totalTimeMs: Long) {
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val locale = configuration.locales[0]
     val seconds = (totalTimeMs / 1000) % 60
     val minutes = (totalTimeMs / (1000 * 60)) % 60
     val hours = (totalTimeMs / (1000 * 60 * 60))
     val timeString = if (hours > 0) {
-        String.format(java.util.Locale.getDefault(), "%dh %02dm %02ds", hours, minutes, seconds)
+        String.format(locale, "%dh %02dm %02ds", hours, minutes, seconds)
     } else if (minutes > 0) {
-        String.format(java.util.Locale.getDefault(), "%dm %02ds", minutes, seconds)
+        String.format(locale, "%dm %02ds", minutes, seconds)
     } else {
-        String.format(java.util.Locale.getDefault(), "%ds", seconds)
+        String.format(locale, "%ds", seconds)
     }
 
     Card(
@@ -367,6 +371,8 @@ fun TotalUsageCard(totalTimeMs: Long) {
 
 @Composable
 fun AppUsageItem(appUsage: AppUsage) {
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val locale = configuration.locales[0]
     val limitMinutes = appUsage.limitMs / 60000
     val usageMinutes = appUsage.usageTimeMs / 60000
     val remainingMinutes = (limitMinutes - usageMinutes).coerceAtLeast(0)
@@ -375,11 +381,11 @@ fun AppUsageItem(appUsage: AppUsage) {
     val minutes = (appUsage.usageTimeMs / (1000 * 60)) % 60
     val hours = (appUsage.usageTimeMs / (1000 * 60 * 60))
     val timeString = if (hours > 0) {
-        String.format(java.util.Locale.getDefault(), "%dh %02dm %02ds", hours, minutes, seconds)
+        String.format(locale, "%dh %02dm %02ds", hours, minutes, seconds)
     } else if (minutes > 0) {
-        String.format(java.util.Locale.getDefault(), "%dm %02ds", minutes, seconds)
+        String.format(locale, "%dm %02ds", minutes, seconds)
     } else {
-        String.format(java.util.Locale.getDefault(), "%ds", seconds)
+        String.format(locale, "%ds", seconds)
     }
 
     val context = LocalContext.current

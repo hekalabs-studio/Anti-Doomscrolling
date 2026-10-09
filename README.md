@@ -1,57 +1,267 @@
-# Anti DumbScroll 🚫📱
+<div align="center">
 
-> **Menghentikan scrolling tanpa henti dan mengembalikan fokus Anda.**
+<img src="docs/images/icon.png" alt="Ikon Anti DumbScroll" width="160" />
 
-Anti DumbScroll adalah aplikasi Android yang dirancang untuk membantu Anda lepas dari jeratan *doomscrolling* atau *dumbscrolling* di media sosial dan aplikasi adiktif lainnya. Aplikasi ini memaksa Anda untuk berhenti sejenak, berpikir ulang, dan mengambil kembali kendali atas waktu Anda.
+# Anti DumbScroll
 
-## ✨ Fitur Utama
-*   **Pemblokir Pintar (Smart Blocker):** Menerapkan eskalasi jeda 30 detik yang memaksa Anda berpikir dua kali sebelum membuka aplikasi adiktif.
-*   **Mode Pomodoro Tangguh:** Sesi fokus yang dijamin berjalan stabil di *background service* agar Anda tidak terdistraksi dan tetap produktif.
-*   **Analitik 7 Hari:** Pantau tren fokus dan kebiasaan digital Anda melalui visualisasi *Bar Chart* yang interaktif.
-*   **Jadwal Pemblokiran Otomatis:** Atur rutinitas harian untuk memblokir aplikasi pada jam-jam tertentu secara otomatis.
-*   **Widget Layar Beranda:** Akses cepat untuk memulai sesi Pomodoro atau melihat status pemblokiran langsung dari *Home Screen*.
-*   **Multi-bahasa:** Mendukung berbagai bahasa, termasuk Bahasa Indonesia (ID), English (EN), Русский (RU), dan 中文 (ZH).
-*   **Tema Dinamis (Material You):** Tampilan antarmuka modern yang secara dinamis menyesuaikan dengan warna *wallpaper* perangkat Anda.
+### Pembatas doomscrolling dan pelatih fokus untuk Android
 
-## 🔒 Komitmen Privasi (Privacy-First)
-**100% Offline & Aman.**
-Aplikasi ini memprioritaskan privasi Anda dan beroperasi sepenuhnya di dalam perangkat.
-*   **Tanpa Akses Internet:** Kami sama sekali tidak mendeklarasikan izin `INTERNET` di aplikasi ini. Data Anda tidak akan pernah keluar dari perangkat.
-*   **Hanya Membaca Package Name:** *Accessibility Service* secara eksklusif hanya digunakan untuk mendeteksi ID aplikasi (*package name*) yang sedang dibuka (untuk keperluan pemblokiran). Aplikasi tidak membaca isi layar, teks yang diketik, atau data pribadi lainnya.
+<br/>
 
-## 🚀 Panduan Instalasi (Penting!)
+[![Rilis terbaru](https://img.shields.io/github/v/release/hekalabs-studio/anti-dumbscroll?style=for-the-badge&labelColor=0d1117)](https://github.com/hekalabs-studio/anti-dumbscroll/releases)
+[![Lisensi](https://img.shields.io/github/license/hekalabs-studio/anti-dumbscroll?style=for-the-badge&labelColor=0d1117)](LICENSE)
+[![Unduhan](https://img.shields.io/github/downloads/hekalabs-studio/anti-dumbscroll/total?style=for-the-badge&labelColor=0d1117)](https://github.com/hekalabs-studio/anti-dumbscroll/releases)
 
-Karena Anti DumbScroll bekerja di tingkat sistem untuk mendeteksi dan memblokir aplikasi, Anda perlu memberikan beberapa izin sistem khusus agar aplikasi dapat berjalan optimal.
+<br/>
 
-### 1. Instalasi APK
-Unduh file APK dari halaman *Releases* dan instal secara manual (sideload) di perangkat Android Anda.
+[**Unduh**](#unduh) · [**Fitur**](#fitur) · [**Pemasangan**](#pemasangan) · [**Izin**](#izin-dan-alasannya) · [**FAQ**](#faq) · [**Dukung**](#dukung-proyek-ini)
 
-### 2. Mengizinkan "Pengaturan Terbatas" di Android 13+ (Aksesibilitas)
-Pada Android 13 ke atas, Google membatasi izin Aksesibilitas untuk aplikasi yang diinstal di luar Play Store. Ikuti langkah ini untuk mengaktifkannya:
-1. Buka **Pengaturan (Settings)** > **Aplikasi (Apps)** > Cari dan pilih **Anti DumbScroll**.
-2. Ketuk ikon **tiga titik (⋮)** di pojok kanan atas.
-3. Pilih **Izinkan pengaturan terbatas (Allow restricted settings)**.
-4. Setelah itu, buka pengaturan Aksesibilitas di perangkat Anda, cari "Anti DumbScroll", dan aktifkan layanannya.
+</div>
 
-### 3. Pengaturan Baterai (Unrestricted)
-Agar *Smart Blocker* dan *Pomodoro Background Service* tidak dimatikan secara paksa oleh sistem operasi (terutama pada perangkat OEM seperti Xiaomi, Samsung, Oppo, dan Vivo):
-1. Buka **Info Aplikasi (App Info)** untuk Anti DumbScroll.
-2. Masuk ke menu **Baterai (Battery)**.
-3. Ubah pengaturannya menjadi **Tidak Dibatasi (Unrestricted)**.
+> [!WARNING]
+> **Status: BETA.** Aplikasi ini masih dalam tahap pengujian. Aplikasi yang memakai layanan Aksesibilitas bisa berperilaku berbeda di tiap merek HP, terutama yang punya penghemat baterai agresif. Laporkan masalah lewat [Issues](https://github.com/hekalabs-studio/anti-dumbscroll/issues).
 
-> [!WARNING]  
-> **Catatan Terkait Aplikasi Perbankan:** Beberapa aplikasi bank mungkin menampilkan peringatan keamanan karena mendeteksi Anti DumbScroll menggunakan fitur *Accessibility Service*. Ini adalah peringatan standar dari aplikasi perbankan. Anda tidak perlu khawatir karena Anti DumbScroll 100% *offline* dan tidak memiliki kemampuan untuk mengirim data ke internet.
+> [!NOTE]
+> **Peringatan saat memasang.** Karena aplikasi ini memakai layanan Aksesibilitas dan dipasang dari luar Play Store, Google Play Protect dan beberapa aplikasi perbankan bisa menandainya. Ini bukan hasil pemindaian virus, tetapi aturan berbasis izin. Baca bagian [Pemasangan](#pemasangan) dan [Privasi](#privasi) sebelum memasang.
 
-## 🛠 Tech Stack
-Aplikasi ini dibangun menggunakan arsitektur dan teknologi Android modern:
-*   **Kotlin** - Bahasa pemrograman utama.
-*   **Jetpack Compose** - UI toolkit deklaratif untuk antarmuka pengguna.
-*   **Room DB** - Penyimpanan database relasional lokal.
-*   **Dagger-Hilt** - *Dependency Injection* untuk arsitektur yang bersih.
-*   **AccessibilityService** - Layanan inti (core system) untuk mendeteksi aktivitas aplikasi.
+---
 
-## 📄 Lisensi & Hak Cipta
-Aplikasi ini didistribusikan di bawah lisensi **GPL-3.0**.
+<div align="center">
 
-**Hak Cipta © 2026 Hekalabs Studio.**
-Logo, desain merek, dan nama "Anti DumbScroll" adalah properti eksklusif milik Hekalabs Studio.
+<h1><a id="tampilan"></a>Tampilan</h1>
+
+<!-- Ganti dengan tangkapan layar asli. Simpan di docs/screenshots/ dengan nama di bawah, atau hapus bagian ini. -->
+<img src="docs/screenshots/dashboard.png" alt="Dashboard" width="30%" />
+<img src="docs/screenshots/fokus.png" alt="Mode Fokus" width="30%" />
+<img src="docs/screenshots/overlay.png" alt="Layar peringatan" width="30%" />
+
+</div>
+
+---
+
+<div align="center">
+
+<h1><a id="fitur"></a>Fitur</h1>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+
+#### Batas waktu per aplikasi
+- Pilih sendiri aplikasi yang ingin dibatasi
+- Aplikasi di luar daftar tidak dihitung dan tidak diganggu
+- Batas waktu sesi yang bisa diatur
+- Peringatan lembut sebelum batas tercapai
+
+</td>
+    <td width="50%" valign="top">
+
+#### Layar jeda
+- Menutup layar saat batas tercapai
+- Menampilkan lama pemakaian, batas, dan total hari ini
+- Tombol "Tutup aplikasi" untuk keluar
+- Tombol tambahan waktu singkat dengan hitung mundur
+
+</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+
+#### Mode Fokus (Pomodoro)
+- Fokus, istirahat pendek, dan istirahat panjang yang bisa diatur
+- Aplikasi pengganggu diblokir selama fase fokus
+- Notifikasi dengan hitung mundur dan aksi Jeda/Akhiri
+- Timer tetap akurat saat aplikasi ditutup
+
+</td>
+    <td width="50%" valign="top">
+
+#### Ringkasan & antarmuka
+- Dashboard pemakaian harian
+- Pencapaian sederhana
+- Tombol Mulai cepat dari Dashboard
+- Tutorial awal yang memandu pemberian izin
+
+</td>
+  </tr>
+</table>
+
+</div>
+
+### Rencana pengembangan
+
+- [ ] Tangga hambatan (jeda makin lama setiap kali memilih lanjut)
+- [ ] Streak harian dan milestone
+- [ ] Pertanyaan kuis singkat sebagai pengganti scrolling
+- [ ] Versi tanpa layanan Aksesibilitas (UsageStats + overlay)
+
+Daftar ini adalah rencana, bukan janji tanggal rilis.
+
+---
+
+<div align="center">
+
+<h1><a id="unduh"></a>Unduh</h1>
+
+<a href="https://github.com/hekalabs-studio/anti-dumbscroll/releases/latest">
+  <img src="https://img.shields.io/badge/Unduh%20APK-GitHub%20Releases-4A5B8C?style=for-the-badge&logo=github&logoColor=white" alt="Unduh APK dari GitHub Releases" />
+</a>
+
+</div>
+
+Unduh berkas `.apk` terbaru dari halaman [Releases](https://github.com/hekalabs-studio/anti-dumbscroll/releases/latest). Aplikasi ini belum tersedia di Google Play.
+
+---
+
+<h1><a id="pemasangan"></a>Pemasangan</h1>
+
+1. **Unduh APK** dari halaman Releases.
+2. **Izinkan pemasangan** dari sumber tidak dikenal untuk aplikasi yang kamu pakai membukanya (peramban atau pengelola berkas) saat diminta.
+3. **Play Protect.** Jika muncul pesan *"App blocked to protect your device"* (aplikasi diblokir), itu karena aplikasi meminta izin Aksesibilitas dan dipasang dari luar Play Store. Pilih opsi yang tersedia di perangkatmu. Jika tidak ada opsi untuk melanjutkan, pengembang dapat memasang lewat kabel USB dan ADB (`adb install anti-dumbscroll.apk`). Hasilnya dapat berbeda di tiap perangkat, dan kami tidak dapat menjaminnya.
+4. **Buka aplikasi** dan ikuti tutorial awal.
+5. **Aktifkan layanan Aksesibilitas** di Pengaturan saat diminta.
+6. **Jika tombol Aksesibilitas abu-abu / "Pengaturan terbatas"** (Android 13 ke atas, aplikasi dari luar Play Store): buka *Pengaturan → Aplikasi → Anti DumbScroll → ⋮ (menu tiga titik) → Izinkan pengaturan terbatas*, lalu coba lagi.
+7. **Atur baterai** aplikasi ke *Tanpa batasan* agar layanan tidak dimatikan sistem, terutama di HP Xiaomi, Oppo, Vivo, dan Samsung.
+
+> [!IMPORTANT]
+> **Aplikasi perbankan.** Beberapa aplikasi bank memeriksa layanan Aksesibilitas dari sumber di luar Play Store dan bisa membatasi dirinya sendiri. Itu keputusan keamanan aplikasi bank tersebut dan di luar kendali kami. Jika terjadi, pertimbangkan untuk menonaktifkan layanan sementara saat memakai aplikasi bank, atau menghapus Anti DumbScroll.
+
+> [!NOTE]
+> **Verifikasi developer Android.** Google menerapkan aturan pendaftaran developer untuk pemasangan di luar Play Store di sejumlah negara, termasuk Indonesia. Pengaruhnya terhadap pemasangan APK dari GitHub dapat berubah. Lihat [developer.android.com/developer-verification](https://developer.android.com/developer-verification).
+
+---
+
+<h1><a id="izin-dan-alasannya"></a>Izin dan alasannya</h1>
+
+| Izin | Untuk apa | Wajib? |
+|---|---|---|
+| Layanan Aksesibilitas | Mengetahui aplikasi mana yang sedang dibuka agar waktunya bisa dihitung dan layar jeda ditampilkan | Ya |
+| Notifikasi | Menampilkan status pemantauan dan hitung mundur Mode Fokus | Disarankan |
+| Layanan latar depan (foreground service) | Menjaga timer Mode Fokus berjalan akurat | Ya, untuk Fokus |
+| Mematikan proses latar belakang | Membersihkan proses aplikasi yang kamu tutup lewat tombol "Tutup" | Opsional |
+| Pengecualian optimasi baterai | Mencegah sistem mematikan layanan | Disarankan |
+
+Daftar ini mengikuti `AndroidManifest.xml` dan dapat berubah antarversi. Selalu periksa daftar izin yang ditampilkan saat memasang.
+
+---
+
+<h1><a id="privasi"></a>Privasi</h1>
+
+- Semua data (daftar aplikasi, pengaturan, statistik) **disimpan di perangkatmu**.
+- Layanan Aksesibilitas hanya digunakan untuk mengetahui **nama aplikasi dan jendela yang sedang aktif**. Aplikasi ini tidak membaca isi layar, pesan, input teks, atau kata sandi.
+- Aplikasi tidak mengirim data ke server dan tidak memuat pustaka iklan atau analitik. *(Pernyataan ini harus diverifikasi ulang setiap kali ada perubahan kode atau dependensi.)*
+
+Rincian lengkap ada di [PRIVACY.md](PRIVACY.md).
+
+---
+
+<h1>Cara kerja dan batasan</h1>
+
+- **"Tutup aplikasi" tidak mematikan paksa aplikasi lain.** Android tidak mengizinkan aplikasi biasa melakukannya. Tombol ini mengirimmu ke Beranda lalu meminta sistem membersihkan proses latar belakang aplikasi tersebut. Sistem dapat menghidupkannya kembali.
+- **Layanan bisa berhenti** bila sistem atau penghemat baterai mematikannya. Aplikasi akan menandai pemantauan tidak aktif, tetapi pemulihan perlu tindakanmu.
+- **Bukan alat pengawasan orang lain.** Aplikasi dirancang agar pengguna membatasi dirinya sendiri, dan pengguna selalu dapat menonaktifkan layanan lewat pengaturan sistem.
+
+---
+
+<h1><a id="faq"></a>FAQ</h1>
+
+**Apakah aplikasi ini virus? Kenapa Play Protect memblokirnya?**
+Bukan. Pemblokiran berasal dari aturan yang menyasar aplikasi dari luar Play Store yang meminta izin sensitif seperti Aksesibilitas, apa pun isinya. Kode sumbernya terbuka di repositori ini sehingga bisa kamu periksa sendiri.
+
+**Kenapa aplikasi bank saya memberi peringatan?**
+Lihat catatan [Aplikasi perbankan](#pemasangan) di atas.
+
+**Apakah aplikasi ini gratis?**
+Ya. Aplikasi gratis dan berlisensi GPL-3.0. Donasi bersifat sukarela dan tidak membuka fitur apa pun.
+
+**Apakah ada di Play Store?**
+Belum.
+
+**Aplikasi tidak memblokir apa pun, kenapa?**
+Pastikan: (1) layanan Aksesibilitas aktif, (2) aplikasi yang ingin dibatasi sudah ada di daftar, (3) baterai aplikasi diatur ke *Tanpa batasan*, (4) batas waktu belum terlalu panjang.
+
+---
+
+<h1>Membangun dari sumber</h1>
+
+1. Pasang [Android Studio](https://developer.android.com/studio) versi terbaru.
+2. Klona repositori:
+   ```bash
+   git clone https://github.com/hekalabs-studio/anti-dumbscroll.git
+   ```
+3. Buka folder proyek di Android Studio dan tunggu sinkronisasi Gradle selesai.
+4. Bangun APK debug:
+   ```bash
+   ./gradlew assembleDebug
+   ```
+   Hasilnya ada di `app/build/outputs/apk/debug/`.
+5. Untuk APK rilis, buat keystore milikmu sendiri dan tandatangani. **Jangan pernah meng-commit keystore atau kata sandinya.**
+
+---
+
+<h1>Berkontribusi</h1>
+
+- Laporan bug dan saran sangat membantu. Buka [Issue](https://github.com/hekalabs-studio/anti-dumbscroll/issues) dan sertakan merek HP, versi Android, langkah mengulang masalah, dan tangkapan layar atau log bila ada.
+- Untuk perubahan kode, diskusikan lewat Issue terlebih dulu.
+- Dengan mengirim kontribusi, kamu setuju kontribusimu dilisensikan di bawah GPL-3.0.
+
+---
+
+<div align="center">
+
+<h1><a id="dukung-proyek-ini"></a>Dukung proyek ini</h1>
+
+<h3>Anti DumbScroll gratis dan open source. Kalau aplikasi ini membantu, kamu bisa mendukung pengembangannya. Tidak wajib.</h3>
+
+<a href="https://hekalabs-donation.vercel.app">
+  <img src="https://img.shields.io/badge/Dukung%20Pengembangan-hekalabs--donation.web.app-C2410C?style=for-the-badge" alt="Dukung pengembangan" />
+</a>
+
+</div>
+
+---
+
+<div align="center">
+
+<h1>Terima kasih</h1>
+
+- **Android Jetpack** (Compose, Navigation 3, Material 3, dan pustaka AndroidX lain) beserta seluruh komunitas open source di baliknya.
+- **Gemini (Google)** yang membantu pembuatan logo dan menemani proses pengembangan di Android Studio.
+- Para penguji dan semua yang melaporkan bug.
+
+Daftar lengkap pustaka dan lisensinya ada di layar **Tentang** dalam aplikasi.
+
+</div>
+
+---
+
+<h1>Lisensi</h1>
+
+Kode sumber dilisensikan di bawah **GNU General Public License v3.0**. Lihat berkas [LICENSE](LICENSE).
+
+Nama **Anti DumbScroll** dan logonya adalah milik Hekalabs Studio dan tidak untuk dipakai pada produk turunan.
+
+---
+
+<div align="center">
+
+<h1>Penafian</h1>
+
+Proyek ini **tidak berafiliasi, didanai, diizinkan, atau didukung** oleh Google LLC, YouTube, Instagram, TikTok, Meta, atau pihak lain yang disebut. Semua merek dagang dan hak kekayaan intelektual yang disebut adalah milik pemiliknya masing-masing.
+
+Aplikasi ini adalah alat bantu kebiasaan digital, bukan layanan medis atau psikologis.
+
+</div>
+
+---
+
+<div align="center">
+
+<br/>
+
+**Dibuat oleh [Hekalabs Studio](https://github.com/hekalabs-studio)**
+Kontak: [hekoding@gmail.com](mailto:hekoding@gmail.com)
+
+© 2026 Hekalabs Studio
+
+</div>

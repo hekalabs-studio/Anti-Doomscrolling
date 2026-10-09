@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.dumbscrolling.R
 
 private const val REPO_URL = "https://github.com/hekalabs-studio/Anti-Doomscrolling"
-private const val DONATION_URL = "https://hekalabs-donation.web.app"
+private const val DONATION_URL = "https://hekalabs-donation.vercel.app"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
