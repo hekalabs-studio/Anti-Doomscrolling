@@ -8,9 +8,9 @@
 
 <br/>
 
-[![Rilis terbaru](https://img.shields.io/github/v/release/hekalabs-studio/anti-dumbscroll?style=for-the-badge&labelColor=0d1117)](https://github.com/hekalabs-studio/anti-dumbscroll/releases)
-[![Lisensi](https://img.shields.io/github/license/hekalabs-studio/anti-dumbscroll?style=for-the-badge&labelColor=0d1117)](LICENSE)
-[![Unduhan](https://img.shields.io/github/downloads/hekalabs-studio/anti-dumbscroll/total?style=for-the-badge&labelColor=0d1117)](https://github.com/hekalabs-studio/anti-dumbscroll/releases)
+[![Versi](https://img.shields.io/badge/Versi-1.0--BETA-4A5B8C?style=for-the-badge&labelColor=0d1117)](https://github.com/hekalabs-studio/Anti-Doomscrolling/releases)
+[![Lisensi](https://img.shields.io/github/license/hekalabs-studio/Anti-Doomscrolling?style=for-the-badge&labelColor=0d1117)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white&labelColor=0d1117)](https://github.com/hekalabs-studio/Anti-Doomscrolling)
 
 <br/>
 
@@ -19,23 +19,24 @@
 </div>
 
 > [!WARNING]
-> **Status: BETA.** Aplikasi ini masih dalam tahap pengujian. Aplikasi yang memakai layanan Aksesibilitas bisa berperilaku berbeda di tiap merek HP, terutama yang punya penghemat baterai agresif. Laporkan masalah lewat [Issues](https://github.com/hekalabs-studio/anti-dumbscroll/issues).
+> **Status: BETA.** Aplikasi ini masih dalam tahap pengujian. Aplikasi yang memakai layanan Aksesibilitas bisa berperilaku berbeda di tiap merek HP, terutama yang punya penghemat baterai agresif. Laporkan masalah lewat [Issues](https://github.com/hekalabs-studio/Anti-Doomscrolling/issues).
 
 > [!NOTE]
 > **Peringatan saat memasang.** Karena aplikasi ini memakai layanan Aksesibilitas dan dipasang dari luar Play Store, Google Play Protect dan beberapa aplikasi perbankan bisa menandainya. Ini bukan hasil pemindaian virus, tetapi aturan berbasis izin. Baca bagian [Pemasangan](#pemasangan) dan [Privasi](#privasi) sebelum memasang.
 
+<!-- Bagian tangkapan layar (dapat dibuka kembali setelah menaruh file di docs/screenshots/)
 ---
 
 <div align="center">
 
 <h1><a id="tampilan"></a>Tampilan</h1>
 
-<!-- Ganti dengan tangkapan layar asli. Simpan di docs/screenshots/ dengan nama di bawah, atau hapus bagian ini. -->
 <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="30%" />
 <img src="docs/screenshots/fokus.png" alt="Mode Fokus" width="30%" />
 <img src="docs/screenshots/overlay.png" alt="Layar peringatan" width="30%" />
 
 </div>
+-->
 
 ---
 
@@ -103,13 +104,13 @@ Daftar ini adalah rencana, bukan janji tanggal rilis.
 
 <h1><a id="unduh"></a>Unduh</h1>
 
-<a href="https://github.com/hekalabs-studio/anti-dumbscroll/releases/latest">
+<a href="https://github.com/hekalabs-studio/Anti-Doomscrolling/releases/latest">
   <img src="https://img.shields.io/badge/Unduh%20APK-GitHub%20Releases-4A5B8C?style=for-the-badge&logo=github&logoColor=white" alt="Unduh APK dari GitHub Releases" />
 </a>
 
 </div>
 
-Unduh berkas `.apk` terbaru dari halaman [Releases](https://github.com/hekalabs-studio/anti-dumbscroll/releases/latest). Aplikasi ini belum tersedia di Google Play.
+Unduh berkas `.apk` terbaru dari halaman [Releases](https://github.com/hekalabs-studio/Anti-Doomscrolling/releases/latest). Aplikasi ini belum tersedia di Google Play.
 
 ---
 
@@ -187,7 +188,7 @@ Pastikan: (1) layanan Aksesibilitas aktif, (2) aplikasi yang ingin dibatasi suda
 1. Pasang [Android Studio](https://developer.android.com/studio) versi terbaru.
 2. Klona repositori:
    ```bash
-   git clone https://github.com/hekalabs-studio/anti-dumbscroll.git
+   git clone https://github.com/hekalabs-studio/Anti-Doomscrolling.git
    ```
 3. Buka folder proyek di Android Studio dan tunggu sinkronisasi Gradle selesai.
 4. Bangun APK debug:
@@ -201,7 +202,7 @@ Pastikan: (1) layanan Aksesibilitas aktif, (2) aplikasi yang ingin dibatasi suda
 
 <h1>Berkontribusi</h1>
 
-- Laporan bug dan saran sangat membantu. Buka [Issue](https://github.com/hekalabs-studio/anti-dumbscroll/issues) dan sertakan merek HP, versi Android, langkah mengulang masalah, dan tangkapan layar atau log bila ada.
+- Laporan bug dan saran sangat membantu. Buka [Issue](https://github.com/hekalabs-studio/Anti-Doomscrolling/issues) dan sertakan merek HP, versi Android, langkah mengulang masalah, dan tangkapan layar atau log bila ada.
 - Untuk perubahan kode, diskusikan lewat Issue terlebih dulu.
 - Dengan mengirim kontribusi, kamu setuju kontribusimu dilisensikan di bawah GPL-3.0.
 
