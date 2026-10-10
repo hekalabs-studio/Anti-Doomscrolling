@@ -14,7 +14,7 @@
 
 <br/>
 
-[**Unduh**](#unduh) · [**Fitur**](#fitur) · [**Pemasangan**](#pemasangan) · [**Izin**](#izin-dan-alasannya) · [**FAQ**](#faq) · [**Dukung**](#dukung-proyek-ini)
+[**Unduh**](#unduh) · [**Tampilan**](#tampilan) · [**Fitur**](#fitur) · [**Pemasangan**](#pemasangan) · [**Izin**](#izin-dan-alasannya) · [**FAQ**](#faq) · [**Dukung**](#dukung-proyek-ini)
 
 </div>
 
@@ -24,19 +24,17 @@
 > [!NOTE]
 > **Peringatan saat memasang.** Karena aplikasi ini memakai layanan Aksesibilitas dan dipasang dari luar Play Store, Google Play Protect dan beberapa aplikasi perbankan bisa menandainya. Ini bukan hasil pemindaian virus, tetapi aturan berbasis izin. Baca bagian [Pemasangan](#pemasangan) dan [Privasi](#privasi) sebelum memasang.
 
-<!-- Bagian tangkapan layar (dapat dibuka kembali setelah menaruh file di docs/screenshots/)
 ---
 
 <div align="center">
 
 <h1><a id="tampilan"></a>Tampilan</h1>
 
-<img src="docs/screenshots/dashboard.png" alt="Dashboard" width="30%" />
-<img src="docs/screenshots/fokus.png" alt="Mode Fokus" width="30%" />
-<img src="docs/screenshots/overlay.png" alt="Layar peringatan" width="30%" />
+<img src="docs/images/dashboard.png" alt="Dashboard" width="30%" />
+<img src="docs/images/fokus.png" alt="Mode Fokus" width="30%" />
+<img src="docs/images/overlay.png" alt="Layar peringatan" width="30%" />
 
 </div>
--->
 
 ---
 
@@ -102,15 +100,22 @@ Daftar ini adalah rencana, bukan janji tanggal rilis.
 
 <div align="center">
 
-<h1><a id="unduh"></a>Unduh</h1>
+<h1><a id="unduh"></a>Unduh Aplikasi</h1>
+
+<p>Unduh berkas instalasi <code>.apk</code> resmi melalui tombol di bawah ini:</p>
 
 <a href="https://github.com/hekalabs-studio/Anti-Doomscrolling/releases/latest">
-  <img src="https://img.shields.io/badge/Unduh%20APK-GitHub%20Releases-4A5B8C?style=for-the-badge&logo=github&logoColor=white" alt="Unduh APK dari GitHub Releases" />
+  <img src="https://img.shields.io/badge/Unduh%20APK%20(Versi%20Terbaru)-GitHub%20Releases-4A5B8C?style=for-the-badge&logo=android&logoColor=white" alt="Unduh APK dari GitHub Releases" />
+</a>
+&nbsp;&nbsp;
+<a href="https://github.com/hekalabs-studio/Anti-Doomscrolling/releases">
+  <img src="https://img.shields.io/badge/Semua%20Rilis-GitHub-238636?style=for-the-badge&logo=github&logoColor=white" alt="Semua Rilis GitHub" />
 </a>
 
 </div>
 
-Unduh berkas `.apk` terbaru dari halaman [Releases](https://github.com/hekalabs-studio/Anti-Doomscrolling/releases/latest). Aplikasi ini belum tersedia di Google Play.
+> [!TIP]
+> Buka halaman [GitHub Releases](https://github.com/hekalabs-studio/Anti-Doomscrolling/releases) lalu unduh berkas `.apk` pada bagian **Assets**. Aplikasi ini belum tersedia di Google Play.
 
 ---
 
