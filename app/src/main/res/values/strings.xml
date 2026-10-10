@@ -75,4 +75,88 @@
     <string name="setting_end_time">End Time</string>
     <string name="overlay_scheduled_block">Outside access hours!</string>
     <string name="overlay_scheduled_desc">This app is automatically blocked because you are currently within the Automatic Schedule range.</string>
+    <string name="reset_data_desc">Are you sure you want to reset all usage statistics and focus sessions? This action cannot be undone.</string>
+    <string name="cancel_btn">Cancel</string>
+    <string name="reset_btn">Reset</string>
+    <string name="settings_title">Pengaturan</string>
+    <string name="back_btn_desc">Kembali</string>
+    <string name="enable_tracking_service">Enable Tracking Service</string>
+    
+    <string name="setting_pomodoro_title">Pengaturan Pomodoro</string>
+    <string name="setting_focus_duration">Durasi Fokus: %1$d menit</string>
+    <string name="setting_short_break">Istirahat Pendek: %1$d menit</string>
+    <string name="setting_long_break">Istirahat Panjang: %1$d menit</string>
+    <string name="setting_long_break_cycle">Siklus Istirahat Panjang: %1$d siklus</string>
+    <string name="setting_auto_start_phase">Auto-mulai fase berikutnya</string>
+    <string name="setting_restore_default">Kembalikan default</string>
+    
+    <string name="setting_session_limit">Session Limit: %1$d minutes</string>
+    <string name="setting_monitored_apps">Monitored Apps</string>
+    <string name="setting_view_tutorial_again">Lihat tutorial lagi</string>
+    <string name="done_btn">Done</string>
+    
+    <string name="monitoring_inactive_warning">Pemantauan tidak aktif! Aplikasi tidak bisa membatasi penggunaan.</string>
+    <string name="enable_btn">Aktifkan</string>
+    
+    <string name="phase_fokus">Fokus</string>
+    <string name="phase_istirahat_pendek">Istirahat Pendek</string>
+    <string name="phase_istirahat_panjang">Istirahat Panjang</string>
+    <string name="continue_btn">Lanjut</string>
+    <string name="pause_btn">Jeda</string>
+    <string name="end_btn">Akhiri</string>
+    
+    <string name="app_usage_title">App Usage</string>
+    <string name="achievements_title">Achievements</string>
+    <string name="tracked_screen_time">Tracked Screen Time</string>
+    <string name="usage_remaining_text">%1$d dari %2$d menit tersisa</string>
+    <string name="weekly_stats_title">Statistik 7 Hari Terakhir</string>
+    <string name="onboarding_title_1">Selamat Datang di Anti DumbScroll</string>
+    <string name="onboarding_desc_1">Aplikasi ini membantumu mengurangi kebiasaan doomscrolling di media sosial agar hidupmu lebih produktif.</string>
+    <string name="onboarding_title_2">Cara Kerja</string>
+    <string name="onboarding_desc_2">1. Tambah aplikasi yang ingin dipantau.\n2. Atur batas waktu harian.\n3. Gunakan Mode Fokus saat butuh konsentrasi tanpa gangguan.</string>
+    <string name="skip_next_btn">Lewati/Lanjut</string>
+    <string name="next_btn">Lanjut</string>
+    
+    <string name="onboarding_access_title">Izin Aksesibilitas (Wajib)</string>
+    <string name="onboarding_access_desc">Anti DumbScroll membaca nama paket aplikasi (package name) yang sedang Anda buka untuk memblokirnya jika melewati batas. Data Anda aman dan hanya diproses di perangkat.</string>
+    <string name="onboarding_status">Status: %1$s</string>
+    <string name="status_active">Aktif</string>
+    <string name="status_inactive">Belum Aktif</string>
+    <string name="onboarding_access_btn">Buka Pengaturan Aksesibilitas</string>
+    <string name="onboarding_access_hint">Hint (Android 13+): Jika tombol abu-abu, buka Pengaturan HP -> Aplikasi -> Anti DumbScroll -> Izinkan pengaturan terbatas.</string>
+    
+    <string name="onboarding_notif_title">Izin Notifikasi</string>
+    <string name="onboarding_notif_desc">Kami memerlukan izin notifikasi untuk memberi tahu Anda saat sesi fokus selesai atau saat aplikasi diblokir.</string>
+    <string name="onboarding_notif_btn">Minta Izin Notifikasi</string>
+    
+    <string name="onboarding_battery_title">Optimasi Baterai</string>
+    <string name="onboarding_battery_desc">Agar pemantauan tidak dihentikan oleh sistem, izinkan aplikasi ini berjalan di latar belakang tanpa batasan baterai.</string>
+    <string name="onboarding_battery_btn">Buka Info Aplikasi</string>
+    <string name="onboarding_battery_hint">Hint: Di Xiaomi/Oppo/Vivo, pastikan \'Mulai Otomatis\' atau izin berjalan di latar belakang diberikan.</string>
+    
+    <string name="onboarding_final_title">Selesai!</string>
+    <string name="onboarding_summary_title">Ringkasan Izin:</string>
+    <string name="onboarding_summary_access">- Aksesibilitas: %1$s</string>
+    <string name="onboarding_summary_notif">- Notifikasi: %1$s</string>
+    <string name="onboarding_ready">Aplikasi sudah siap digunakan!</string>
+    <string name="onboarding_open_app_btn">Buka Aplikasi</string>
+    <string name="onboarding_access_required">Izin Aksesibilitas diwajibkan untuk memantau aplikasi. Harap aktifkan terlebih dahulu.</string>
+    <string name="onboarding_back_to_perm_btn">Kembali ke langkah izin</string>
+    
+    <string name="achievement_1_title">First Step</string>
+    <string name="achievement_1_desc">Track your first app usage.</string>
+    <string name="achievement_2_title">Awareness</string>
+    <string name="achievement_2_desc">Reach 15 seconds of tracked time.</string>
+    <string name="achievement_3_title">Data Collector</string>
+    <string name="achievement_3_desc">Track usage across at least 2 apps.</string>
+    
+    <string name="end_session_title">Akhiri Sesi?</string>
+    <string name="end_session_desc">Sesi fokus akan dihentikan dan progres saat ini akan hilang.</string>
+    <string name="end_session_confirm">Ya, Akhiri</string>
+    <string name="total_sessions_today">Total Sesi Hari Ini: %1$d</string>
+    <string name="cycle_count">Siklus %1$d dari %2$d</string>
+    <string name="phase_idle">Siap untuk Fokus</string>
+    <string name="skip_phase_btn">Lewati fase</string>
+    
+    <string name="toast_notif_permission_required">Izin notifikasi diperlukan untuk menjalankan fitur pemantauan</string>
 </resources>
